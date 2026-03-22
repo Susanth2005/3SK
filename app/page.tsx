@@ -26,6 +26,8 @@ interface AlertData {
   source?: string;
   reporter?: string;
   responders?: Record<string, boolean>;
+  deviceId?: string;
+  locationName?: string;
 }
 
 export default function Home() {

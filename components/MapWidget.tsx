@@ -38,6 +38,8 @@ interface AlertData {
   source?: string;
   reporter?: string;
   responders?: Record<string, boolean>;
+  deviceId?: string;
+  locationName?: string;
 }
 
 interface MapWidgetProps {
@@ -148,6 +150,13 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
               <h3 className="font-bold text-red-600 mb-1">
                 {alert.type ? alert.type.toUpperCase() : 'INCIDENT DETECTED'}
               </h3>
+              
+              {alert.locationName && (
+                <div className="font-bold text-xs text-zinc-900 mb-1">
+                  📍 {alert.locationName}
+                </div>
+              )}
+
               <p className="text-sm text-zinc-800 mb-2">{alert.message}</p>
               
               {alert.contact && (
@@ -161,7 +170,9 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
                 {alert.source === 'manual' ? (
                   <span className="bg-amber-100 text-amber-800 px-1 rounded font-medium ml-2">Manual</span>
                 ) : (
-                  <span className="bg-blue-100 text-blue-800 px-1 rounded font-medium ml-2">Sensor</span>
+                  <span className="bg-blue-100 text-blue-800 px-1 rounded font-medium ml-2">
+                    {alert.deviceId ? alert.deviceId : 'Sensor'}
+                  </span>
                 )}
               </p>
               

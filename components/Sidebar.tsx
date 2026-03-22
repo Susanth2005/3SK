@@ -16,6 +16,8 @@ interface AlertData {
   source?: string;
   reporter?: string;
   responders?: Record<string, boolean>;
+  deviceId?: string;
+  locationName?: string;
 }
 
 interface SidebarProps {
@@ -81,6 +83,13 @@ export default function Sidebar({ alerts = [], onFocusLocation }: SidebarProps) 
                     {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
                   </span>
                 </div>
+                
+                {alert.locationName && (
+                  <div className="text-zinc-800 dark:text-white font-bold text-xs mb-1 flex items-center gap-1">
+                    📍 {alert.locationName}
+                  </div>
+                )}
+                
                 <p className="text-black dark:text-zinc-200 text-sm mb-3 leading-snug">{alert.message}</p>
                 
                 {alert.contact && (
@@ -96,7 +105,9 @@ export default function Sidebar({ alerts = [], onFocusLocation }: SidebarProps) 
                   {alert.source === 'manual' ? (
                     <span className="text-[10px] bg-amber-100 dark:bg-amber-900/50 text-amber-800 dark:text-amber-400 px-1.5 py-0.5 rounded font-medium border border-amber-200 dark:border-amber-800">User Report</span>
                   ) : (
-                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium border border-blue-200 dark:border-blue-800">Q2 Sensor</span>
+                    <span className="text-[10px] bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-400 px-1.5 py-0.5 rounded font-medium border border-blue-200 dark:border-blue-800">
+                      {alert.deviceId ? alert.deviceId : 'Q2 Sensor'}
+                    </span>
                   )}
                 </div>
                 
