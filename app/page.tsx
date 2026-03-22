@@ -66,7 +66,15 @@ export default function Home() {
         const currentAlerts: AlertData[] = [];
         
         Object.keys(data).forEach(key => {
-          const alertObj = { id: key, ...data[key] };
+          const rawData = data[key];
+          // Fallback: if timestamp is missing or zero, use current time
+          const timestamp = rawData.timestamp && rawData.timestamp > 0 ? rawData.timestamp : Date.now();
+          
+          const alertObj = { 
+            id: key, 
+            ...rawData,
+            timestamp // Ensure we have a valid number here
+          };
           currentAlerts.push(alertObj);
           
           if (initialLoadDone.current && !processedIds.current.has(key)) {
