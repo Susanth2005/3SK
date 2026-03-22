@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import RespondButton from './RespondButton';
-import { X, Bell, LogOut, ShieldAlert, Radio } from 'lucide-react';
+import { X, Bell, LogOut, ShieldAlert, Radio, Clock, MapPin, Cpu, User } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AlertData {
@@ -54,7 +54,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 dark:bg-black/60 z-[9998] md:hidden backdrop-blur-[2px]"
+            className="fixed inset-0 bg-black/60 z-[9998] md:hidden backdrop-blur-md"
             onClick={onClose}
           />
         )}
@@ -64,133 +64,149 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
         initial={false}
         animate={{ 
           x: (window?.innerWidth < 768 && !isOpen) ? '-100%' : '0%',
-          transition: { type: 'spring', damping: 25, stiffness: 200 }
+          transition: { type: 'spring', damping: 28, stiffness: 220 }
         }}
         className={`
-          fixed md:relative top-0 left-0 h-[100dvh] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-xl border-r border-zinc-200/50 dark:border-zinc-800/50 
-          flex flex-col z-[9999] shadow-2xl md:shadow-none
-          w-[320px] sm:w-[360px] max-w-[85vw]
+          fixed md:relative top-0 left-0 h-[100dvh] bg-[#09090b]/95 backdrop-blur-3xl border-r border-white/5 
+          flex flex-col z-[9999] shadow-[20px_0_50px_rgba(0,0,0,0.5)] md:shadow-none
+          w-[360px] sm:w-[400px] max-w-[90vw]
         `}
       >
-        <div className="px-6 py-8 flex flex-col gap-1 shrink-0 bg-zinc-50/50 dark:bg-zinc-800/20 border-b border-zinc-200/50 dark:border-zinc-800/50">
-          <div className="flex justify-between items-center mb-2">
-            <div className="flex items-center gap-2">
-              <div className="bg-red-500 p-1.5 rounded-lg shadow-lg shadow-red-500/20">
-                <ShieldAlert className="w-5 h-5 text-white" />
+        <div className="px-8 pt-10 pb-8 flex flex-col gap-2 shrink-0 border-b border-white/5 bg-gradient-to-br from-zinc-900/50 to-transparent">
+          <div className="flex justify-between items-center">
+            <div className="flex items-center gap-3">
+              <div className="bg-red-600 p-2 rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.3)] border-t border-white/20">
+                <ShieldAlert className="w-6 h-6 text-white" />
               </div>
-              <h2 className="text-xl font-black tracking-tighter text-black dark:text-white uppercase italic">
-                Live Feed
-              </h2>
+              <div className="flex flex-col">
+                <h2 className="text-2xl font-black tracking-tighter text-white uppercase italic leading-none">
+                  Matrix Feed
+                </h2>
+                <div className="flex items-center gap-1.5 mt-1.5">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                  </span>
+                  <span className="text-[10px] font-black text-emerald-500/80 tracking-[0.2em] uppercase">
+                    Sync Active
+                  </span>
+                </div>
+              </div>
             </div>
             <button 
               onClick={onClose}
-              className="md:hidden p-2 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-full transition-colors"
+              className="md:hidden p-2.5 bg-white/5 hover:bg-white/10 border border-white/5 rounded-2xl transition-all"
             >
               <X className="w-5 h-5 text-zinc-500" />
             </button>
           </div>
-          <div className="flex items-center gap-2 mt-1">
-             <div className="relative flex h-2 w-2">
-              <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
-              <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-            </div>
-            <span className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 tracking-widest uppercase">
-              System Connected
-            </span>
-          </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 custom-scrollbar">
+        <div className="flex-1 overflow-y-auto px-6 py-8 space-y-6 custom-scrollbar">
           {alerts.length === 0 ? (
-            <div className="h-40 flex flex-col items-center justify-center gap-3">
-              <div className="animate-pulse bg-zinc-100 dark:bg-zinc-800 p-4 rounded-full">
-                <Radio className="w-8 h-8 text-zinc-400" />
+            <div className="h-60 flex flex-col items-center justify-center gap-4">
+              <div className="bg-zinc-900/50 p-6 rounded-[32px] border border-white/5">
+                <Radio className="w-10 h-10 text-zinc-700 animate-pulse" />
               </div>
-              <p className="text-sm font-medium text-zinc-400">Scanning satellite data...</p>
+              <p className="text-[11px] font-black text-zinc-600 uppercase tracking-[0.3em]">No Active Nodes</p>
             </div>
           ) : (
             alerts.map((alert, idx) => (
               <motion.div 
-                initial={{ opacity: 0, y: 10 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.05 }}
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: idx * 0.05, type: 'spring' }}
                 key={alert.id} 
                 onClick={() => onFocusLocation?.({ lat: alert.lat, lng: alert.lng })}
-                className="group relative p-5 rounded-2xl border border-zinc-200/50 dark:border-zinc-800/50 bg-white dark:bg-zinc-900/50 shadow-sm hover:shadow-md hover:border-red-400/50 dark:hover:border-red-500/50 transition-all cursor-pointer ring-1 ring-transparent active:scale-[0.98]"
+                className="group relative p-6 rounded-[28px] border border-white/5 bg-[#121214] shadow-lg hover:bg-[#18181b] hover:border-red-500/30 transition-all cursor-pointer ring-1 ring-white/5 active:scale-[0.97]"
               >
-                <div className="flex justify-between items-start mb-3">
-                  <div className={`px-2 py-0.5 rounded-md text-[9px] font-black tracking-widest uppercase ${
-                    alert.type === 'Fire' ? 'bg-red-100 text-red-700 border border-red-200' : 'bg-blue-100 text-blue-700 border border-blue-200'
+                <div className="flex justify-between items-start mb-4">
+                  <div className={`px-3 py-1 rounded-xl text-[9px] font-black tracking-[0.2em] uppercase border shadow-sm ${
+                    alert.type === 'Fire' 
+                      ? 'bg-red-500/10 text-red-400 border-red-500/20' 
+                      : 'bg-blue-500/10 text-blue-400 border-blue-500/20'
                   }`}>
-                    {alert.type || 'Alert'}
+                    {alert.type || 'INCIDENT'}
                   </div>
-                  <span className="text-[10px] font-bold text-zinc-400 dark:text-zinc-500">
-                    {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                  </span>
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <Clock className="w-3 h-3" />
+                    <span className="text-[10px] font-black tracking-wider">
+                      {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
+                  </div>
                 </div>
                 
                 {alert.locationName && (
-                  <div className="text-zinc-900 dark:text-zinc-100 font-extrabold text-xs mb-1.5 flex items-center gap-1.5 line-clamp-1">
-                    <span className="p-0.5 bg-zinc-100 dark:bg-zinc-800 rounded">📍</span>
+                  <div className="text-white font-black text-xs mb-3 flex items-center gap-2 group-hover:text-red-400 transition-colors">
+                    <div className="p-1.5 bg-red-500/10 rounded-lg">
+                      <MapPin className="w-3.5 h-3.5 text-red-500" />
+                    </div>
                     {alert.locationName}
                   </div>
                 )}
                 
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-relaxed mb-4 line-clamp-3">
+                <p className="text-zinc-400 text-sm leading-relaxed mb-6 font-medium">
                   {alert.message}
                 </p>
                 
                 {alert.contact && (
-                  <div className="text-[11px] font-bold text-zinc-700 dark:text-zinc-300 mb-4 bg-zinc-50 dark:bg-zinc-800/50 p-2.5 rounded-xl flex items-center gap-3 border border-zinc-200/50 dark:border-white/5">
-                    <span className="text-sm">📞</span>
+                  <div className="text-xs font-bold text-white mb-6 bg-zinc-900/50 p-4 rounded-2xl flex items-center gap-3 border border-white/5">
+                    <div className="w-8 h-8 bg-white/5 rounded-xl flex items-center justify-center">
+                      <span className="text-sm">📞</span>
+                    </div>
                     {alert.contact}
                   </div>
                 )}
 
-                <div className="flex justify-between items-center pt-3 border-t border-zinc-100 dark:border-zinc-800/50">
-                   <div className="flex flex-col gap-0.5">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-tighter">Source Identity</span>
-                    <span className={`text-[10px] font-black uppercase ${alert.source === 'manual' ? 'text-amber-500' : 'text-blue-500'}`}>
-                      {alert.deviceId || (alert.source === 'manual' ? 'User Auth' : 'Satellite')}
+                <div className="flex justify-between items-center pt-5 border-t border-white/5">
+                   <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5">
+                      {alert.source === 'manual' ? <User className="w-3 h-3 text-amber-500" /> : <Cpu className="w-3 h-3 text-blue-500" />}
+                      <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest italic">Signal Source</span>
+                    </div>
+                    <span className={`text-[11px] font-black uppercase tracking-wider ${alert.source === 'manual' ? 'text-amber-500/80' : 'text-blue-500/80'}`}>
+                      {alert.deviceId || (alert.source === 'manual' ? 'Authorized User' : 'Hardware Node')}
                     </span>
                   </div>
-                  <RespondButton alertId={alert.id} responders={alert.responders} />
+                  <div className="scale-90 origin-right">
+                    <RespondButton alertId={alert.id} responders={alert.responders} />
+                  </div>
                 </div>
               </motion.div>
             ))
           )}
         </div>
 
-        <div className="px-6 py-6 bg-zinc-50/50 dark:bg-zinc-800/20 border-t border-zinc-200/50 dark:border-zinc-800/50 space-y-4 shrink-0">
+        <div className="px-8 py-8 bg-[#0c0c0e] border-t border-white/5 space-y-6 shrink-0">
           {permission !== 'granted' && (
             <motion.button 
               whileHover={{ scale: 1.02 }}
               whileTap={{ scale: 0.98 }}
               onClick={requestNotificationPermission}
-              className="w-full bg-black dark:bg-white text-white dark:text-black font-black py-2.5 px-4 rounded-xl text-[10px] tracking-widest uppercase transition-all flex items-center justify-center gap-2 hover:opacity-90 shadow-xl shadow-black/10 dark:shadow-white/5"
+              className="w-full bg-white text-black font-black py-4 px-4 rounded-2xl text-[10px] tracking-[0.25em] uppercase transition-all flex items-center justify-center gap-3 hover:bg-zinc-200 shadow-[0_20px_40px_-10px_rgba(255,255,255,0.15)]"
             >
-              <Bell className="w-3.5 h-3.5" />
-              Enable Push Alerts
+              <Bell className="w-4 h-4 fill-black" />
+              Enable Push Protocol
             </motion.button>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-8 h-8 rounded-full bg-gradient-to-tr from-zinc-200 to-zinc-400 dark:from-zinc-700 dark:to-zinc-500 flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-zinc-700 to-zinc-900 border border-white/10 flex items-center justify-center text-xs font-black text-white shadow-xl">
                 {user?.email?.charAt(0).toUpperCase()}
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-wider">Operator</span>
-                <span className="text-xs font-bold text-zinc-600 dark:text-zinc-200 truncate">{user?.email}</span>
+              <div className="flex flex-col">
+                <span className="text-[10px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Station Operator</span>
+                <span className="text-xs font-bold text-white/80 tracking-tight">{user?.email}</span>
               </div>
             </div>
             
             <button 
               onClick={logout}
-              className="p-2.5 text-zinc-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-950/20 rounded-xl transition-all"
-              title="Sign Out"
+              className="p-3 bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/40 rounded-2xl transition-all group"
+              title="Terminate Session"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 text-zinc-500 group-hover:text-red-500" />
             </button>
           </div>
         </div>
