@@ -1,22 +1,27 @@
-@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@100;300;400;500;600;700;800;900&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
 
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
 :root {
-  --font-outfit: 'Outfit', sans-serif;
+  --font-inter: 'Inter', sans-serif;
 }
 
 body {
-  background-color: #09090b;
-  color: #fafafa;
-  font-family: var(--font-outfit), system-ui, sans-serif;
+  background-color: #ffffff;
+  color: #18181b;
+  font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+.dark body {
+  background-color: #09090b;
+  color: #fafafa;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 5px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -24,67 +29,36 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(0, 0, 0, 0.1);
   border-radius: 10px;
 }
 
-.custom-scrollbar::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.2);
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.1);
 }
 
-/* Premium Map Overlay Effects */
+/* Enterprise Map Base */
 .leaflet-container {
+  background: #f4f4f5 !important;
+}
+
+.dark .leaflet-container {
   background: #09090b !important;
 }
 
-.leafet-popup-content-wrapper {
-  background: rgba(15, 15, 18, 0.8) !important;
-  backdrop-filter: blur(12px) !important;
-  border: 1px solid rgba(255, 255, 255, 0.1) !important;
-  color: white !important;
+/* Standard UI Components */
+.card-standard {
+  @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 rounded-xl shadow-sm transition-all;
 }
 
-.leaflet-popup-tip {
-  background: rgba(15, 15, 18, 0.8) !important;
+.card-standard:hover {
+  @apply border-zinc-300 dark:border-zinc-700 shadow-md;
 }
 
-/* Glassmorphism Classes */
-.glass-panel {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
+.btn-primary {
+  @apply bg-red-600 hover:bg-red-700 text-white font-semibold py-2 px-4 rounded-lg transition-all shadow-sm active:scale-[0.98];
 }
 
-.premium-card {
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.06) 0%, rgba(255, 255, 255, 0.02) 100%);
-  border: 1px solid rgba(255, 255, 255, 0.06);
-  box-shadow: 0 4px 24px -1px rgba(0, 0, 0, 0.2);
-}
-
-.premium-card:hover {
-  border-color: rgba(239, 68, 68, 0.2);
-  background: linear-gradient(145deg, rgba(255, 255, 255, 0.08) 0%, rgba(255, 255, 255, 0.03) 100%);
-}
-
-/* Background Glows */
-.bg-glow-red {
-  background: radial-gradient(circle at center, rgba(220, 38, 38, 0.15) 0%, transparent 70%);
-}
-
-.bg-glow-blue {
-  background: radial-gradient(circle at center, rgba(37, 99, 235, 0.1) 0%, transparent 70%);
-}
-
-/* Animation Utilities */
-.animate-slow-pulse {
-  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
-}
-
-@keyframes pulse {
-  0%, 100% {
-    opacity: 1;
-  }
-  50% {
-    opacity: 0.6;
-  }
+.btn-secondary {
+  @apply bg-white dark:bg-zinc-900 border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white font-medium py-2 px-4 rounded-lg hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all shadow-sm;
 }

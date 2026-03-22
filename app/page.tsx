@@ -5,17 +5,17 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Menu, Plus, Navigation, Zap } from 'lucide-react';
+import { Menu, Plus, Navigation } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportModal from '@/components/ReportModal';
 
 const MapWidget = dynamic(() => import('@/components/MapWidget'), { 
   ssr: false,
   loading: () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-[#09090b]">
-      <div className="flex flex-col items-center gap-4">
-        <div className="w-12 h-12 border-4 border-red-500/20 border-t-red-500 rounded-full animate-spin"></div>
-        <p className="text-zinc-500 font-bold tracking-widest text-[10px] uppercase animate-pulse">Initializing Neural Map...</p>
+    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+      <div className="flex flex-col items-center gap-2">
+        <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+        <p className="text-zinc-500 font-medium text-xs">Loading Dashboard...</p>
       </div>
     </div>
   )
@@ -54,7 +54,6 @@ export default function Home() {
         }
         new Notification(`🚨 NEW ALERT: ${alertData.type ? alertData.type.toUpperCase() : 'INCIDENT'}`, {
           body: `${alertData.message}\nLat: ${alertData.lat.toFixed(4)}, Lng: ${alertData.lng.toFixed(4)}`,
-          icon: 'https://raw.githubusercontent.com/pointhi/leaflet-color-markers/master/img/marker-icon-2x-red.png',
           tag: `alert-${alertData.id}-${count}`,
           requireInteraction: true
         });
@@ -111,14 +110,7 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-row h-[100dvh] bg-[#09090b] overflow-hidden w-full relative">
-      {/* Background Graphic Effects */}
-      <div className="absolute inset-0 pointer-events-none z-0 overflow-hidden">
-        <div className="absolute -top-[10%] -left-[10%] w-[50%] h-[50%] bg-red-600/10 blur-[120px] rounded-full animate-slow-pulse"></div>
-        <div className="absolute top-[20%] -right-[10%] w-[40%] h-[40%] bg-blue-600/5 blur-[120px] rounded-full"></div>
-        <div className="absolute -bottom-[10%] left-[20%] w-[30%] h-[30%] bg-red-900/10 blur-[100px] rounded-full"></div>
-      </div>
-
+    <div className="flex flex-row h-[100dvh] bg-white dark:bg-zinc-950 overflow-hidden w-full relative">
       {/* Desktop Sidebar / Mobile Drawer */}
       <Sidebar 
         alerts={alerts} 
@@ -131,69 +123,58 @@ export default function Home() {
         onClose={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden">
-        {/* Floating Action Buttons (FAB) */}
-        <div className="absolute top-6 left-6 z-[1001] flex flex-col gap-4">
+      <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden border-l border-zinc-200 dark:border-zinc-800">
+        
+        {/* Navigation Actions (FABs) - Clean Enterprise Styling */}
+        <div className="absolute top-4 left-4 z-[1001] flex flex-col gap-3">
           <motion.button 
             whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.9 }}
+            whileTap={{ scale: 0.95 }}
             onClick={() => setIsSidebarOpen(true)}
-            className="md:hidden bg-[#18181b]/80 backdrop-blur-xl p-3.5 rounded-2xl shadow-2xl border border-white/10 text-white transition-all ring-1 ring-white/5"
+            className="md:hidden bg-white dark:bg-zinc-900 p-3 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
           >
             <Menu className="w-6 h-6" />
           </motion.button>
         </div>
 
-        <div className="absolute top-6 right-6 z-[1001] flex flex-col gap-4 items-end">
+        <div className="absolute top-4 right-4 z-[1001] flex flex-col gap-3 items-end">
           <motion.button 
-            whileHover={{ scale: 1.02, y: -2 }}
+            whileHover={{ scale: 1.02 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsReportModalOpen(true)}
-            className="group bg-red-600 text-white pl-5 pr-6 py-4 rounded-[20px] shadow-[0_20px_40px_-10px_rgba(220,38,38,0.4)] flex items-center gap-3 font-black text-xs tracking-[0.15em] border-t border-white/20 transition-all uppercase italic"
+            className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 font-bold text-sm transition-colors border-t border-white/20"
           >
-            <Zap className="w-4 h-4 fill-white animate-pulse" />
-            DEPLOY ALERT
+            <Plus className="w-5 h-5" />
+            <span>REPORT INCIDENT</span>
           </motion.button>
 
-          <div className="flex flex-col gap-2">
-            <motion.button 
-              whileHover={{ scale: 1.1 }}
-              whileTap={{ scale: 0.9 }}
-              onClick={handleMyLocation}
-              className="bg-[#18181b]/80 backdrop-blur-xl p-4 rounded-2xl shadow-2xl border border-white/10 text-white transition-all hover:bg-zinc-800/90 ring-1 ring-white/5"
-              title="Locate Me"
-            >
-              <Navigation className="w-5 h-5" />
-            </motion.button>
-          </div>
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={handleMyLocation}
+            className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 transition-all"
+            title="My Location"
+          >
+            <Navigation className="w-5 h-5 fill-current" />
+          </motion.button>
         </div>
 
         <MapWidget alerts={alerts} focusLocation={focusLocation} />
 
-        {/* Mobile Swipe-up Summary Tab */}
+        {/* Mobile Mini-Feed Pull-up */}
         <AnimatePresence>
           {!isSidebarOpen && (
             <motion.div 
-              initial={{ y: 100, opacity: 0 }}
+              initial={{ y: 20, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 100, opacity: 0 }}
+              exit={{ y: 20, opacity: 0 }}
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden absolute bottom-8 left-1/2 -translate-x-1/2 z-[1001] bg-[#18181b]/90 backdrop-blur-2xl px-8 py-4 rounded-[24px] border border-white/10 shadow-[0_32px_64px_-16px_rgba(0,0,0,0.5)] flex items-center gap-4 cursor-pointer select-none active:scale-95 transition-transform ring-1 ring-white/5"
+              className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[1001] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3 rounded-full border border-zinc-200 dark:border-zinc-800 shadow-xl flex items-center gap-3 cursor-pointer"
             >
-              <div className="relative flex h-2.5 w-2.5">
-                <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-500 opacity-75"></span>
-                <span className="relative inline-flex rounded-full h-2.5 w-2.5 bg-red-600 shadow-lg shadow-red-500/50"></span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-[10px] font-black tracking-[0.2em] text-white uppercase italic leading-none mb-1">
-                  Alert Matrix
-                </span>
-                <span className="text-[9px] font-bold text-zinc-500 uppercase tracking-widest leading-none">
-                  {alerts.length} Nodes Active
-                </span>
-              </div>
-              <div className="w-[1px] h-6 bg-white/10 mx-2"></div>
-              <Menu className="w-4 h-4 text-zinc-400" />
+              <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse"></div>
+              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
+                {alerts.length} Active Alerts
+              </span>
             </motion.div>
           )}
         </AnimatePresence>
