@@ -5,17 +5,17 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Menu, Plus, Navigation, Activity, ShieldCheck, Settings } from 'lucide-react';
+import { Menu, Plus, Navigation, Activity, ShieldCheck, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportModal from '@/components/ReportModal';
 
 const MapWidget = dynamic(() => import('@/components/MapWidget'), { 
   ssr: false,
   loading: () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
-      <div className="flex flex-col items-center gap-3">
-        <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
-        <p className="text-zinc-500 font-bold tracking-widest text-[9px] uppercase">Initializing Grid...</p>
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
+      <div className="flex flex-col items-center gap-4">
+        <div className="w-12 h-12 border-[4px] border-white/5 border-t-red-600 rounded-full animate-spin"></div>
+        <p className="text-white/20 font-black tracking-[0.5em] text-[10px] uppercase italic">Quantum Link Active</p>
       </div>
     </div>
   )
@@ -52,7 +52,7 @@ export default function Home() {
           clearInterval(interval);
           return;
         }
-        new Notification(`🛡️ SYSTEM UPDATE: ${alertData.type ? alertData.type.toUpperCase() : 'INCIDENT'}`, {
+        new Notification(`🛡️ HIGH ALPHA ALERT: ${alertData.type ? alertData.type.toUpperCase() : 'INCIDENT'}`, {
           body: `${alertData.message}`,
           tag: `alert-${alertData.id}-${count}`,
           requireInteraction: true
@@ -110,114 +110,127 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-col h-[100dvh] bg-zinc-50 dark:bg-zinc-950 overflow-hidden w-full selection:bg-red-500/20">
-      
-      {/* Master Class Header */}
-      <header className="app-header">
-        <div className="flex items-center justify-between w-full">
-          <div className="flex items-center gap-4">
-            <button 
-              onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-colors"
-            >
-              <Menu className="w-5 h-5" />
-            </button>
-            <div className="flex items-center gap-3">
-              <div className="w-10 h-10 bg-red-600 rounded-xl flex items-center justify-center shadow-[0_8px_16px_-4px_rgba(220,38,38,0.4)] ring-1 ring-white/20">
-                <ShieldCheck className="w-6 h-6 text-white" />
-              </div>
-              <div className="flex flex-col">
-                <h1 className="heading-heavy leading-none">Emergency Grid</h1>
-                <span className="subheading-light mt-1.5 flex items-center gap-1.5">
-                  <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                  Real-time Monitoring Active
-                </span>
+    <div className="flex flex-row h-[100dvh] bg-black overflow-hidden w-full relative selection:bg-red-500/40">
+      {/* Advertisement Mesh Background */}
+      <div className="mesh-bg" />
+
+      {/* Floating Header Module */}
+      <header className="fixed top-8 left-8 right-8 z-[1100] pointer-events-none">
+        <div className="flex items-center justify-between w-full pointer-events-auto">
+          <motion.div 
+            initial={{ x: -20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="flex items-center gap-4 group cursor-pointer"
+          >
+            <div className="w-14 h-14 bg-red-600 rounded-[20px] flex items-center justify-center shadow-[0_15px_30px_-5px_rgba(220,38,38,0.5)] ring-1 ring-white/30 group-hover:scale-110 transition-transform">
+              <ShieldCheck className="w-8 h-8 text-white" />
+            </div>
+            <div className="flex flex-col">
+              <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-none">
+                Titan Grid
+              </h1>
+              <div className="flex items-center gap-2 mt-1.5 opacity-60">
+                <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Quantum Core Active</span>
               </div>
             </div>
-          </div>
+          </motion.div>
 
-          <div className="hidden md:flex items-center gap-6">
-             <div className="flex items-center gap-4 px-4 py-2 bg-zinc-100 dark:bg-zinc-900 rounded-xl border border-zinc-200 dark:border-zinc-800">
-                <div className="flex flex-col items-end">
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1">Active Alerts</span>
-                  <span className="text-[13px] font-black text-zinc-900 dark:text-white italic leading-none">{alerts.length}</span>
-                </div>
-                <div className="w-[1px] h-6 bg-zinc-200 dark:bg-zinc-800"></div>
-                <div className="flex flex-col items-end">
-                  <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1">Node Status</span>
-                  <span className="text-[13px] font-black text-emerald-500 italic leading-none">Optimal</span>
-                </div>
-             </div>
-             <button className="p-2.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-xl transition-all border border-transparent hover:border-zinc-200 dark:hover:border-zinc-800">
-               <Settings className="w-5 h-5 text-zinc-500" />
-             </button>
-          </div>
+          <motion.div 
+            initial={{ x: 20, opacity: 0 }}
+            animate={{ x: 0, opacity: 1 }}
+            className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden"
+          >
+            <div className="flex flex-col items-center mr-4">
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
+              <span className="text-lg font-black italic text-white leading-none">{alerts.length}</span>
+            </div>
+            <div className="w-[1px] h-6 bg-white/10"></div>
+            <div className="flex flex-col items-center">
+              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Response Latency</span>
+              <span className="text-lg font-black italic text-emerald-500 leading-none">0.2ms</span>
+            </div>
+          </motion.div>
         </div>
       </header>
 
-      <div className="flex flex-1 overflow-hidden">
-        <Sidebar 
-          alerts={alerts} 
-          onFocusLocation={(loc) => {
-            setFocusLocation(null);
-            setTimeout(() => setFocusLocation(loc), 10);
-            if (window.innerWidth < 1024) setIsSidebarOpen(false);
-          }} 
-          isOpen={isSidebarOpen}
-          onClose={() => setIsSidebarOpen(false)}
-        />
+      <Sidebar 
+        alerts={alerts} 
+        onFocusLocation={(loc) => {
+          setFocusLocation(null);
+          setTimeout(() => setFocusLocation(loc), 10);
+          if (window.innerWidth < 1024) setIsSidebarOpen(false);
+        }} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      
+      <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden">
         
-        <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden">
-          
-          <MapWidget alerts={alerts} focusLocation={focusLocation} />
+        <MapWidget alerts={alerts} focusLocation={focusLocation} />
 
-          {/* Clean Enterprise FABs */}
-          <div className="absolute top-6 right-6 z-[1001] flex flex-col gap-3 items-end">
-            <motion.button 
-              whileHover={{ scale: 1.02 }}
-              whileTap={{ scale: 0.98 }}
-              onClick={() => setIsReportModalOpen(true)}
-              className="bg-red-600 hover:bg-red-700 text-white px-6 py-4 rounded-2xl shadow-2xl flex items-center gap-3 font-black text-[11px] tracking-widest transition-all border-t border-white/20"
-            >
-              <Plus className="w-4 h-4 stroke-[3px]" />
-              REPORT INCIDENT
-            </motion.button>
+        {/* Luxe Floating Controls */}
+        <div className="absolute top-32 right-8 z-[1001] flex flex-col gap-5 items-end">
+          <motion.button 
+            whileHover={{ scale: 1.05, y: -2 }}
+            whileTap={{ scale: 0.95 }}
+            onClick={() => setIsReportModalOpen(true)}
+            className="luxe-btn-red group"
+          >
+            <div className="flex items-center gap-4">
+               <Zap className="w-5 h-5 fill-white animate-pulse" />
+               <span className="relative z-10">Broadcast Incident</span>
+            </div>
+          </motion.button>
 
+          <div className="flex flex-col gap-4">
             <motion.button 
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.95 }}
+              whileHover={{ scale: 1.15, rotate: 10 }}
+              whileTap={{ scale: 0.9 }}
               onClick={handleMyLocation}
-              className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-xl border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-white transition-all"
-              title="My Position"
+              className="w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all hover:bg-white/10"
+              title="Locate Transponder"
             >
-              <Navigation className="w-5 h-5 fill-current" />
+              <Navigation className="w-6 h-6 fill-current" />
+            </motion.button>
+            <motion.button 
+              whileHover={{ scale: 1.15 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all"
+            >
+              <Menu className="w-6 h-6" />
             </motion.button>
           </div>
+        </div>
 
-          {/* Mobile Status Bar */}
-          <AnimatePresence>
-            {!isSidebarOpen && (
-              <motion.div 
-                initial={{ y: 20, opacity: 0 }}
-                animate={{ y: 0, opacity: 1 }}
-                exit={{ y: 20, opacity: 0 }}
-                onClick={() => setIsSidebarOpen(true)}
-                className="lg:hidden absolute bottom-8 left-6 right-6 z-[1001] bg-white dark:bg-zinc-900 px-6 py-4 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-2xl flex items-center justify-between"
-              >
-                <div className="flex items-center gap-3">
-                  <Activity className="w-4 h-4 text-red-600" />
-                  <span className="text-[11px] font-black text-zinc-900 dark:text-white uppercase tracking-widest italic">
-                    {alerts.length} Active Incidents
-                  </span>
+        {/* Mobile Luxe Status Bar */}
+        <AnimatePresence>
+          {!isSidebarOpen && (
+            <motion.div 
+              initial={{ y: 100, opacity: 0 }}
+              animate={{ y: 0, opacity: 1 }}
+              exit={{ y: 100, opacity: 0 }}
+              onClick={() => setIsSidebarOpen(true)}
+              className="lg:hidden absolute bottom-10 left-8 right-8 z-[1001] h-20 rounded-[30px] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex items-center justify-between px-8 cursor-pointer active:scale-95 transition-transform group"
+            >
+              <div className="flex items-center gap-5">
+                <div className="relative flex h-4 w-4">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.8)] border border-white/20"></span>
                 </div>
-                <div className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest px-3 py-1.5 bg-zinc-50 dark:bg-zinc-800 rounded-lg border border-zinc-100 dark:border-zinc-700">
-                  View Feed
+                <div className="flex flex-col">
+                  <span className="text-[12px] font-black italic tracking-widest text-white uppercase leading-none">Titan Grid Live</span>
+                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1.5">Processing {alerts.length} Nodes</span>
                 </div>
-              </motion.div>
-            )}
-          </AnimatePresence>
-        </main>
-      </div>
+              </div>
+              <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">
+                 <Activity className="w-5 h-5 text-white/60" />
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
+      </main>
 
       <ReportModal isOpen={isReportModalOpen} onClose={() => setIsReportModalOpen(false)} />
     </div>
