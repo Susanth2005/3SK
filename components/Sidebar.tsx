@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import RespondButton from './RespondButton';
-import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target } from 'lucide-react';
+import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AlertData {
@@ -116,7 +116,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                 animate={{ opacity: 1 }} 
                 className="h-64 flex flex-col items-center justify-center gap-6"
               >
-                <div className="p-8 bg-white/5 rounded-[40px] border border-white/5 shadow-inner">
+                <div className="p-1 bg-white/10 rounded-lg border border-white/5 shadow-inner">
                   <Radio className="w-10 h-10 text-white/10 animate-pulse" />
                 </div>
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] italic">Scanning Frequencies...</p>

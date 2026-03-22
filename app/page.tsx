@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Menu, Plus, Navigation, Activity, ShieldCheck, Zap } from 'lucide-react';
+import { Menu, Plus, Navigation, Zap, Activity, ShieldCheck } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportModal from '@/components/ReportModal';
 
