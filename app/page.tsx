@@ -5,6 +5,7 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
+import { Menu } from 'lucide-react';
 
 const MapWidget = dynamic(() => import('@/components/MapWidget'), { 
   ssr: false,
@@ -33,6 +34,7 @@ interface AlertData {
 export default function Home() {
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [focusLocation, setFocusLocation] = useState<{lat: number, lng: number} | null>(null);
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const initialLoadDone = useRef(false);
   const processedIds = useRef<Set<string>>(new Set());
 
@@ -88,9 +90,26 @@ export default function Home() {
   }, []);
 
   return (
-    <div className="flex flex-row h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden w-full">
-      <Sidebar alerts={alerts} onFocusLocation={setFocusLocation} />
-      <main className="flex-1 relative flex flex-col z-0 border-l border-zinc-200 dark:border-zinc-800">
+    <div className="flex flex-row h-screen bg-zinc-50 dark:bg-zinc-950 overflow-hidden w-full relative">
+      <Sidebar 
+        alerts={alerts} 
+        onFocusLocation={(loc) => {
+          setFocusLocation(loc);
+          if (window.innerWidth < 768) setIsSidebarOpen(false);
+        }} 
+        isOpen={isSidebarOpen}
+        onClose={() => setIsSidebarOpen(false)}
+      />
+      
+      <main className="flex-1 relative flex flex-col z-0 border-l border-zinc-200 dark:border-zinc-800 w-full h-full">
+        {/* Mobile Toggle Button */}
+        <button 
+          onClick={() => setIsSidebarOpen(true)}
+          className="md:hidden absolute top-4 left-4 z-[1001] bg-white dark:bg-zinc-900 p-2.5 rounded-full shadow-lg border border-zinc-200 dark:border-zinc-700 text-zinc-700 dark:text-zinc-200"
+        >
+          <Menu className="w-6 h-6" />
+        </button>
+
         <MapWidget alerts={alerts} focusLocation={focusLocation} />
       </main>
     </div>

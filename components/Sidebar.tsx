@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import ReportModal from './ReportModal';
 import RespondButton from './RespondButton';
+import { X } from 'lucide-react';
 
 interface AlertData {
   id: string;
@@ -23,9 +24,11 @@ interface AlertData {
 interface SidebarProps {
   alerts?: AlertData[];
   onFocusLocation?: (loc: { lat: number, lng: number }) => void;
+  isOpen?: boolean;
+  onClose?: () => void;
 }
 
-export default function Sidebar({ alerts = [], onFocusLocation }: SidebarProps) {
+export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [permission, setPermission] = useState<string>('default');
@@ -46,7 +49,20 @@ export default function Sidebar({ alerts = [], onFocusLocation }: SidebarProps) 
 
   return (
     <>
-      <aside className="w-80 bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 h-screen flex flex-col py-6 shadow-sm z-[9999] relative">
+      {/* Mobile Overlay Backdrop */}
+      {isOpen && (
+        <div 
+          className="fixed inset-0 bg-black/50 z-[9998] md:hidden backdrop-blur-sm transition-opacity"
+          onClick={onClose}
+        />
+      )}
+
+      <aside className={`
+        fixed md:relative top-0 left-0 h-full bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 
+        flex flex-col py-6 shadow-sm z-[9999] transition-transform duration-300 ease-in-out
+        w-80 sm:w-80 max-w-[85vw]
+        ${isOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
+      `}>
         <div className="px-6 mb-6 flex justify-between items-center">
           <h2 className="text-xl font-bold tracking-tight text-black dark:text-white flex items-center gap-2">
             <span className="relative flex h-3 w-3">
@@ -55,12 +71,20 @@ export default function Sidebar({ alerts = [], onFocusLocation }: SidebarProps) 
             </span>
             Active Alerts
           </h2>
-          <button 
-            onClick={() => setIsModalOpen(true)}
-            className="text-xs bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md transition-colors"
-          >
-            + Report
-          </button>
+          <div className="flex items-center gap-2">
+            <button 
+              onClick={() => setIsModalOpen(true)}
+              className="text-xs bg-red-600 hover:bg-red-700 text-white font-bold px-3 py-1.5 rounded-md transition-colors"
+            >
+              + Report
+            </button>
+            <button 
+              onClick={onClose}
+              className="md:hidden p-1 text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg"
+            >
+              <X className="w-5 h-5" />
+            </button>
+          </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-4 space-y-3 pb-4 custom-scrollbar">
