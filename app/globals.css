@@ -6,17 +6,24 @@
 
 :root {
   --font-inter: 'Inter', sans-serif;
+  --sidebar-width: 380px;
+  --header-height: 72px;
 }
 
 body {
-  background-color: #000000;
-  color: #f4f4f5;
+  background-color: #f8f9fa;
+  color: #1a1a1a;
   font-family: var(--font-inter), system-ui, sans-serif;
   -webkit-font-smoothing: antialiased;
 }
 
+.dark body {
+  background-color: #0c0c0e;
+  color: #ecedee;
+}
+
 .custom-scrollbar::-webkit-scrollbar {
-  width: 4px;
+  width: 6px;
 }
 
 .custom-scrollbar::-webkit-scrollbar-track {
@@ -24,53 +31,60 @@ body {
 }
 
 .custom-scrollbar::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.1);
-  border-radius: 10px;
+  background: rgba(0, 0, 0, 0.08);
+  border-radius: 20px;
 }
 
-/* Base Map */
+.dark .custom-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Master Class Map Base */
 .leaflet-container {
-  background: #000000 !important;
+  background: #f8f9fa !important;
 }
 
-/* Floating Glass Design System */
-.glass-island {
-  background: rgba(15, 15, 18, 0.7);
-  backdrop-filter: blur(24px) saturate(160%);
-  border: 1px solid rgba(255, 255, 255, 0.08);
-  box-shadow: 0 8px 32px -4px rgba(0, 0, 0, 0.8), 0 0 0 1px rgba(255, 255, 255, 0.03);
+.dark .leaflet-container {
+  background: #0c0c0e !important;
 }
 
-.glass-card {
-  background: rgba(255, 255, 255, 0.03);
-  backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.05);
-  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+/* App Shell Components */
+.app-header {
+  @apply h-[var(--header-height)] bg-white dark:bg-zinc-950 border-b border-zinc-200 dark:border-zinc-800/50 flex items-center px-8 sticky top-0 z-[1002] transition-colors;
 }
 
-.glass-card:hover {
-  background: rgba(255, 255, 255, 0.05);
-  border-color: rgba(255, 255, 255, 0.1);
-  transform: translateY(-2px);
+.sidebar-container {
+  @apply w-[var(--sidebar-width)] h-[calc(100dvh-var(--header-height))] bg-white dark:bg-zinc-950 border-r border-zinc-200 dark:border-zinc-800/50 flex flex-col transition-colors;
 }
 
-.glass-active {
-  border-color: rgba(239, 68, 68, 0.3) !important;
-  background: rgba(239, 68, 68, 0.03) !important;
+/* Beautiful Alert Cards */
+.alert-row {
+  @apply p-5 rounded-2xl border border-zinc-100 dark:border-zinc-800/40 bg-white dark:bg-zinc-900/50 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-sm relative overflow-hidden;
 }
 
-/* Typography Overrides */
-h1, h2, h3 {
-  letter-spacing: -0.02em;
+.alert-row::before {
+  content: '';
+  @apply absolute left-0 top-0 bottom-0 w-1 rounded-l-2xl;
 }
 
-/* Custom Marker Glows */
-@keyframes alert-glow {
-  0% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.4); }
-  70% { box-shadow: 0 0 0 12px rgba(239, 68, 68, 0); }
-  100% { box-shadow: 0 0 0 0 rgba(239, 68, 68, 0); }
+.alert-row-fire::before {
+  @apply bg-red-600;
 }
 
-.alert-pulse {
-  animation: alert-glow 2s infinite;
+.alert-row-alert::before {
+  @apply bg-blue-600;
+}
+
+/* Clean Professional Icons */
+.icon-container {
+  @apply flex items-center justify-center rounded-xl transition-all;
+}
+
+/* Typography Polish */
+.heading-heavy {
+  @apply font-extrabold tracking-tight text-zinc-900 dark:text-white uppercase italic text-lg;
+}
+
+.subheading-light {
+  @apply font-bold text-zinc-400 dark:text-zinc-500 uppercase tracking-[0.2em] text-[10px];
 }
