@@ -1,14 +1,14 @@
 @import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&display=swap');
 
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
 
-:root {
-  --font-outfit: 'Outfit', sans-serif;
-  --neon-red: #ff003c;
-  --neon-blue: #00f7ff;
-  --luxe-bg: #030303;
+@layer base {
+  :root {
+    --font-outfit: 'Outfit', sans-serif;
+    --neon-red: #ff003c;
+    --neon-blue: #00f7ff;
+    --luxe-bg: #030303;
+  }
 }
 
 body {
