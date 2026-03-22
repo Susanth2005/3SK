@@ -5,7 +5,7 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Menu, Plus, Navigation, Zap, Activity, ShieldCheck } from 'lucide-react';
+import { Menu, Plus, Navigation, Activity, ShieldCheck, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportModal from '@/components/ReportModal';
 
@@ -111,10 +111,9 @@ export default function Home() {
 
   return (
     <div className="flex flex-row h-[100dvh] bg-black overflow-hidden w-full relative selection:bg-red-500/40">
-      {/* Advertisement Mesh Background */}
       <div className="mesh-bg" />
 
-      {/* Floating Header Module */}
+      {/* Floating Header */}
       <header className="fixed top-8 left-8 right-8 z-[1100] pointer-events-none">
         <div className="flex items-center justify-between w-full pointer-events-auto">
           <motion.div 
@@ -136,10 +135,11 @@ export default function Home() {
             </div>
           </motion.div>
 
+          {/* Metrics Console */}
           <motion.div 
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-2xl overflow-hidden"
+            className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[20px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-2xl"
           >
             <div className="flex flex-col items-center mr-4">
               <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
@@ -166,21 +166,21 @@ export default function Home() {
       />
       
       <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden">
-        
         <MapWidget alerts={alerts} focusLocation={focusLocation} />
 
-        {/* Luxe Floating Controls */}
+        {/* Global Controls */}
         <div className="absolute top-32 right-8 z-[1001] flex flex-col gap-5 items-end">
           <motion.button 
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsReportModalOpen(true)}
-            className="luxe-btn-red group"
+            className="relative overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black px-8 py-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(255,0,60,0.4)] transition-all text-xs tracking-[0.2em] uppercase group"
           >
-            <div className="flex items-center gap-4">
+            <div className="flex items-center gap-4 relative z-10">
                <Zap className="w-5 h-5 fill-white animate-pulse" />
-               <span className="relative z-10">Broadcast Incident</span>
+               <span>Broadcast Incident</span>
             </div>
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
           </motion.button>
 
           <div className="flex flex-col gap-4">
@@ -204,7 +204,7 @@ export default function Home() {
           </div>
         </div>
 
-        {/* Mobile Luxe Status Bar */}
+        {/* Mobile Terminal Summary */}
         <AnimatePresence>
           {!isSidebarOpen && (
             <motion.div 
@@ -212,7 +212,7 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden absolute bottom-10 left-8 right-8 z-[1001] h-20 rounded-[30px] bg-white/5 backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex items-center justify-between px-8 cursor-pointer active:scale-95 transition-transform group"
+              className="lg:hidden absolute bottom-10 left-8 right-8 z-[1001] h-20 rounded-[30px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex items-center justify-between px-8 cursor-pointer active:scale-95 transition-transform group"
             >
               <div className="flex items-center gap-5">
                 <div className="relative flex h-4 w-4">

@@ -74,7 +74,6 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
           overflow-hidden
         `}
       >
-        {/* Header Section */}
         <div className="px-10 pt-12 pb-8 shrink-0 border-b border-white/5 relative overflow-hidden">
           <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-red-600 via-transparent to-red-600"></div>
           
@@ -107,7 +106,6 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
           </div>
         </div>
 
-        {/* Alerts Feed */}
         <div className="flex-1 overflow-y-auto px-6 py-8 space-y-5 custom-scrollbar relative z-10">
           <AnimatePresence mode="popLayout">
             {alerts.length === 0 ? (
@@ -116,7 +114,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                 animate={{ opacity: 1 }} 
                 className="h-64 flex flex-col items-center justify-center gap-6"
               >
-                <div className="p-1 bg-white/10 rounded-lg border border-white/5 shadow-inner">
+                <div className="p-8 bg-white/5 rounded-[40px] border border-white/5 shadow-inner">
                   <Radio className="w-10 h-10 text-white/10 animate-pulse" />
                 </div>
                 <p className="text-[10px] font-black text-white/20 uppercase tracking-[0.5em] italic">Scanning Frequencies...</p>
@@ -130,7 +128,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                   transition={{ type: "spring", damping: 20, stiffness: 100, delay: idx * 0.1 }}
                   key={alert.id} 
                   onClick={() => onFocusLocation?.({ lat: alert.lat, lng: alert.lng })}
-                  className="luxe-card group cursor-pointer active:scale-[0.97]"
+                  className="relative rounded-[32px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-6 transition-all duration-500 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-1 shadow-2xl group cursor-pointer active:scale-[0.97] overflow-hidden"
                 >
                   <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-10 transition-all duration-700 group-hover:opacity-30 pointer-events-none ${
                     alert.type === 'Fire' ? 'bg-red-600' : 'bg-cyan-500'
@@ -183,18 +181,18 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
           </AnimatePresence>
         </div>
 
-        {/* Footer Section */}
+        {/* Footer Dashboard */}
         <div className="px-10 py-10 bg-black/40 border-t border-white/5 space-y-8 shrink-0 mt-auto relative overflow-hidden backdrop-blur-3xl">
           <div className="absolute bottom-0 right-0 w-32 h-32 bg-red-600/10 blur-3xl rounded-full"></div>
           
           {permission !== 'granted' && (
             <button 
               onClick={requestNotificationPermission}
-              className="luxe-btn-red w-full !rounded-[24px] !px-0 bg-gradient-to-r from-zinc-100 to-white text-black shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95"
+              className="relative overflow-hidden w-full bg-gradient-to-r from-zinc-100 to-white text-black font-black px-8 py-4 rounded-[24px] shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all text-xs tracking-[0.2em] uppercase"
             >
-              <div className="flex items-center justify-center gap-4">
+              <div className="flex items-center justify-center gap-4 relative z-10">
                 <BellRing className="w-4 h-4 fill-black animate-bounce" />
-                <span className="relative z-10 font-black">Enable Satellite Link</span>
+                <span>Enable Satellite Link</span>
               </div>
             </button>
           )}
