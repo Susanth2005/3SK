@@ -3,7 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import RespondButton from './RespondButton';
-import { X, Bell, LogOut, ShieldAlert, Clock, MapPin, Radio } from 'lucide-react';
+import { X, Bell, LogOut, ShieldAlert, Radio, Clock, MapPin, Activity, Cpu } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 interface AlertData {
@@ -54,7 +54,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             exit={{ opacity: 0 }}
-            className="fixed inset-0 bg-black/40 z-[9998] md:hidden backdrop-blur-sm"
+            className="fixed inset-0 bg-black/60 z-[9998] md:hidden backdrop-blur-md transition-all"
             onClick={onClose}
           />
         )}
@@ -63,118 +63,162 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
       <motion.aside 
         initial={false}
         animate={{ 
-          x: (window?.innerWidth < 768 && !isOpen) ? '-100%' : '0%',
-          transition: { type: 'spring', damping: 25, stiffness: 200 }
+          x: (typeof window !== 'undefined' && window.innerWidth < 1024 && !isOpen) ? '-110%' : '0%',
+          transition: { type: 'spring', damping: 30, stiffness: 200 }
         }}
         className={`
-          fixed md:relative top-0 left-0 h-full bg-white dark:bg-zinc-900 border-r border-zinc-200 dark:border-zinc-800 
-          flex flex-col z-[9999] shadow-xl md:shadow-none
-          w-[320px] sm:w-[360px] max-w-[85vw]
+          fixed lg:relative top-0 lg:top-6 left-0 lg:left-6 h-[100dvh] lg:h-[calc(100dvh-48px)] 
+          flex flex-col z-[9999] transition-all duration-300
+          w-[340px] sm:w-[380px] max-w-[90vw]
+          lg:rounded-[32px] glass-island overflow-hidden
         `}
       >
-        <div className="px-6 py-6 border-b border-zinc-100 dark:border-zinc-800 shrink-0">
-          <div className="flex justify-between items-center">
-            <div className="flex items-center gap-2">
-              <ShieldAlert className="w-6 h-6 text-red-600" />
-              <h2 className="text-xl font-bold tracking-tight text-zinc-900 dark:text-white">
-                Active Alerts
-              </h2>
+        {/* Header Section */}
+        <div className="px-8 pt-10 pb-6 shrink-0 border-b border-white/5">
+          <div className="flex justify-between items-center mb-6">
+            <div className="flex items-center gap-3">
+              <div className="p-2.5 bg-red-600 rounded-2xl shadow-[0_0_20px_rgba(220,38,38,0.3)] ring-1 ring-white/20">
+                <ShieldAlert className="w-6 h-6 text-white" />
+              </div>
+              <div className="flex flex-col">
+                <h2 className="text-xl font-black tracking-tighter text-white uppercase italic leading-none">
+                  Grid Monitor
+                </h2>
+                <div className="flex items-center gap-2 mt-2">
+                  <span className="relative flex h-2 w-2">
+                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]"></span>
+                  </span>
+                  <span className="text-[9px] font-black text-emerald-500/80 tracking-[0.2em] uppercase leading-none">
+                    Data Sync Live
+                  </span>
+                </div>
+              </div>
             </div>
-            <button onClick={onClose} className="md:hidden p-1.5 hover:bg-zinc-100 dark:hover:bg-zinc-800 rounded-lg">
+            <button onClick={onClose} className="lg:hidden p-2.5 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-colors">
               <X className="w-5 h-5 text-zinc-500" />
             </button>
           </div>
-          <div className="flex items-center gap-2 mt-2">
-            <div className="h-2 w-2 rounded-full bg-green-500"></div>
-            <span className="text-[10px] font-bold text-zinc-500 uppercase tracking-wider">Systems Online</span>
+          
+          <div className="grid grid-cols-2 gap-2">
+            <div className="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+              <span className="block text-[8px] font-bold text-zinc-500 uppercase tracking-widest leading-tight">Total Alerts</span>
+              <span className="text-sm font-black text-white italic">{alerts.length}</span>
+            </div>
+            <div className="bg-white/5 rounded-xl px-4 py-2 border border-white/5">
+              <span className="block text-[8px] font-bold text-zinc-500 uppercase tracking-widest leading-tight">Active Nodes</span>
+              <span className="text-sm font-black text-white italic">03</span>
+            </div>
           </div>
         </div>
 
-        <div className="flex-1 overflow-y-auto px-4 py-4 space-y-3 custom-scrollbar">
+        {/* Alerts Feed */}
+        <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 custom-scrollbar">
           {alerts.length === 0 ? (
-            <div className="flex flex-col items-center justify-center h-40 text-center text-zinc-400">
-              <Radio className="w-10 h-10 mb-2 opacity-20" />
-              <p className="text-sm font-medium">Monitoring for incidents...</p>
+            <div className="h-40 flex flex-col items-center justify-center gap-4">
+              <div className="p-5 bg-white/5 rounded-[28px] border border-white/5">
+                <Radio className="w-8 h-8 text-zinc-700 animate-pulse" />
+              </div>
+              <p className="text-[10px] font-bold text-zinc-500 uppercase tracking-[0.3em] italic">No Signal Detected</p>
             </div>
           ) : (
-            alerts.map((alert) => (
-              <div 
+            alerts.map((alert, idx) => (
+              <motion.div 
+                initial={{ opacity: 0, scale: 0.95 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: idx * 0.05 }}
                 key={alert.id} 
                 onClick={() => onFocusLocation?.({ lat: alert.lat, lng: alert.lng })}
-                className="p-4 rounded-xl border border-zinc-200 dark:border-zinc-800 bg-white dark:bg-zinc-900 hover:bg-zinc-50 dark:hover:bg-zinc-800 transition-all cursor-pointer shadow-sm group active:scale-[0.98]"
+                className="group p-5 rounded-[24px] glass-card ring-1 ring-white/5 cursor-pointer relative overflow-hidden active:scale-[0.98]"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <span className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded border ${
-                    alert.type === 'Fire' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-blue-50 text-blue-600 border-blue-100'
+                <div className={`absolute top-0 right-0 w-24 h-24 blur-[40px] opacity-20 transition-opacity group-hover:opacity-40 pointer-events-none ${
+                   alert.type === 'Fire' ? 'bg-red-500' : 'bg-blue-500'
+                }`}></div>
+
+                <div className="flex justify-between items-start mb-4 relative z-10">
+                  <div className={`px-2.5 py-1 rounded-lg text-[9px] font-black tracking-widest uppercase border ${
+                    alert.type === 'Fire' ? 'bg-red-500/10 text-red-500 border-red-500/20' : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
                   }`}>
-                    {alert.type || 'Incident'}
-                  </span>
-                  <div className="flex items-center gap-1 text-[10px] font-medium text-zinc-500">
-                    <Clock className="w-3 h-3" />
-                    {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    {alert.type || 'Alert'}
+                  </div>
+                  <div className="flex items-center gap-1.5 text-zinc-400">
+                    <Clock className="w-3 h-3 stroke-[2.5]" />
+                    <span className="text-[10px] font-black tracking-widest">
+                      {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                    </span>
                   </div>
                 </div>
                 
                 {alert.locationName && (
-                  <div className="text-zinc-900 dark:text-zinc-100 font-bold text-xs mb-1.5 flex items-center gap-1.5">
-                    <MapPin className="w-3.5 h-3.5 text-red-600 shrink-0" />
+                  <div className="text-white font-black text-xs mb-2 flex items-center gap-2 relative z-10">
+                    <div className="p-1 bgColor-white/10 rounded-lg">
+                      <MapPin className="w-3 h-3 text-red-500" />
+                    </div>
                     {alert.locationName}
                   </div>
                 )}
                 
-                <p className="text-zinc-600 dark:text-zinc-400 text-sm leading-snug mb-3">
+                <p className="text-zinc-400 text-[13px] leading-relaxed mb-4 line-clamp-2 relative z-10 font-medium">
                   {alert.message}
                 </p>
                 
                 {alert.contact && (
-                  <div className="text-[11px] font-medium text-zinc-700 dark:text-zinc-300 mb-3 bg-zinc-50 dark:bg-zinc-800 p-2 rounded-lg border border-zinc-100 dark:border-zinc-800 flex items-center gap-2">
-                    <span className="text-sm">📞</span>
+                  <div className="text-[10px] font-black text-zinc-300 mb-4 bg-white/5 p-3 rounded-xl flex items-center gap-3 border border-white/5 relative z-10">
+                    <div className="w-6 h-6 bg-white/5 rounded-lg flex items-center justify-center text-xs">📞</div>
                     {alert.contact}
                   </div>
                 )}
 
-                <div className="flex justify-between items-center pt-3 border-t border-zinc-50 dark:border-zinc-800">
-                  <div className="flex flex-col">
-                    <span className="text-[9px] font-bold text-zinc-400 uppercase tracking-widest">Source</span>
-                    <span className="text-[10px] font-semibold text-zinc-700 dark:text-zinc-300">
-                      {alert.deviceId || (alert.source === 'manual' ? 'Manual Link' : 'Automated Node')}
+                <div className="flex justify-between items-center pt-4 border-t border-white/5 relative z-10">
+                   <div className="flex flex-col gap-1">
+                    <div className="flex items-center gap-1.5 opacity-40">
+                      <Cpu className="w-3 h-3" />
+                      <span className="text-[8px] font-black uppercase tracking-widest">Signal Source</span>
+                    </div>
+                    <span className="text-[10px] font-black uppercase text-zinc-300 tracking-wider">
+                      {alert.deviceId || (alert.source === 'manual' ? 'Auth User' : 'Node Auto')}
                     </span>
                   </div>
-                  <RespondButton alertId={alert.id} responders={alert.responders} />
+                  <div className="scale-90 origin-right">
+                    <RespondButton alertId={alert.id} responders={alert.responders} />
+                  </div>
                 </div>
-              </div>
+              </motion.div>
             ))
           )}
         </div>
 
-        <div className="px-6 py-6 bg-zinc-50 dark:bg-zinc-800/20 border-t border-zinc-200 dark:border-zinc-800 space-y-4 shrink-0 mt-auto">
+        {/* Footer Section */}
+        <div className="px-8 py-8 bg-black/40 border-t border-white/5 space-y-6 shrink-0 mt-auto">
           {permission !== 'granted' && (
             <button 
               onClick={requestNotificationPermission}
-              className="w-full bg-red-600 hover:bg-red-700 text-white font-bold py-2.5 px-4 rounded-xl text-xs flex items-center justify-center gap-2 transition-all shadow-md active:scale-[0.98]"
+              className="w-full bg-white text-black font-black py-4 px-4 rounded-[22px] text-[10px] tracking-widest uppercase flex items-center justify-center gap-3 hover:bg-zinc-200 transition-all shadow-[0_12px_24px_-8px_rgba(255,255,255,0.3)] active:scale-95"
             >
-              <Bell className="w-4 h-4" />
-              ENABLE ALERTS
+              <Bell className="w-4 h-4 fill-black" />
+              Enable Protocool
             </button>
           )}
 
           <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3 overflow-hidden">
-              <div className="w-9 h-9 rounded-lg bg-zinc-200 dark:bg-zinc-700 flex items-center justify-center text-xs font-bold text-zinc-600 dark:text-zinc-300 shadow-inner">
-                {user?.email?.charAt(0).toUpperCase()}
+            <div className="flex items-center gap-4">
+              <div className="w-10 h-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center shadow-2xl">
+                <div className="w-6 h-6 bg-zinc-700 rounded-lg flex items-center justify-center text-[10px] font-black text-white">
+                  {user?.email?.charAt(0).toUpperCase()}
+                </div>
               </div>
-              <div className="flex flex-col overflow-hidden">
-                <span className="text-[10px] font-bold text-zinc-400 uppercase tracking-widest leading-none mb-1">Station Admin</span>
-                <span className="text-[11px] font-medium text-zinc-900 dark:text-zinc-200 truncate">{user?.email}</span>
+              <div className="flex flex-col">
+                <span className="text-[9px] font-black text-zinc-500 uppercase tracking-widest leading-none mb-1">Supervisor</span>
+                <span className="text-xs font-black text-white/80 tracking-tight italic">{user?.email?.split('@')[0]}</span>
               </div>
             </div>
             
             <button 
               onClick={logout}
-              className="p-2 text-zinc-400 hover:text-red-600 hover:bg-white dark:hover:bg-zinc-700 rounded-lg transition-all"
-              title="Sign Out"
+              className="p-3 bg-white/5 hover:bg-red-500/10 border border-white/5 hover:border-red-500/30 rounded-2xl transition-all group"
+              title="Terminate"
             >
-              <LogOut className="w-4 h-4" />
+              <LogOut className="w-4 h-4 text-zinc-600 group-hover:text-red-500" />
             </button>
           </div>
         </div>

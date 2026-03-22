@@ -5,17 +5,17 @@ import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { Menu, Plus, Navigation } from 'lucide-react';
+import { Menu, Plus, Navigation, Layers } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 import ReportModal from '@/components/ReportModal';
 
 const MapWidget = dynamic(() => import('@/components/MapWidget'), { 
   ssr: false,
   loading: () => (
-    <div className="absolute inset-0 flex items-center justify-center bg-zinc-50 dark:bg-zinc-950">
+    <div className="absolute inset-0 flex items-center justify-center bg-black">
       <div className="flex flex-col items-center gap-2">
-        <div className="w-8 h-8 border-2 border-zinc-200 dark:border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
-        <p className="text-zinc-500 font-medium text-xs">Loading Dashboard...</p>
+        <div className="w-10 h-10 border-[3px] border-zinc-800 border-t-red-600 rounded-full animate-spin"></div>
+        <p className="text-zinc-500 font-bold tracking-widest text-[10px] uppercase">Connecting Nodes...</p>
       </div>
     </div>
   )
@@ -110,8 +110,13 @@ export default function Home() {
   };
 
   return (
-    <div className="flex flex-row h-[100dvh] bg-white dark:bg-zinc-950 overflow-hidden w-full relative">
-      {/* Desktop Sidebar / Mobile Drawer */}
+    <div className="flex flex-row h-[100dvh] bg-black overflow-hidden w-full relative selection:bg-red-500/30">
+      {/* Background Ambience */}
+      <div className="absolute inset-0 z-0 pointer-events-none opacity-40">
+        <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-red-600/10 blur-[150px] rounded-full"></div>
+        <div className="absolute bottom-0 left-0 w-[600px] h-[600px] bg-blue-600/5 blur-[150px] rounded-full"></div>
+      </div>
+
       <Sidebar 
         alerts={alerts} 
         onFocusLocation={(loc) => {
@@ -123,58 +128,77 @@ export default function Home() {
         onClose={() => setIsSidebarOpen(false)}
       />
       
-      <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden border-l border-zinc-200 dark:border-zinc-800">
+      <main className="flex-1 relative flex flex-col z-10 w-full h-full overflow-hidden">
         
-        {/* Navigation Actions (FABs) - Clean Enterprise Styling */}
-        <div className="absolute top-4 left-4 z-[1001] flex flex-col gap-3">
+        {/* Floating Controls Overlay */}
+        <div className="absolute top-6 left-6 z-[1001] flex flex-col gap-4">
           <motion.button 
-            whileHover={{ scale: 1.05 }}
+            whileHover={{ scale: 1.05, backgroundColor: 'rgba(24, 24, 27, 0.9)' }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsSidebarOpen(true)}
-            className="md:hidden bg-white dark:bg-zinc-900 p-3 rounded-xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-900 dark:text-zinc-100"
+            className="md:hidden glass-island p-4 rounded-[20px] text-white transition-all outline-none"
           >
             <Menu className="w-6 h-6" />
           </motion.button>
         </div>
 
-        <div className="absolute top-4 right-4 z-[1001] flex flex-col gap-3 items-end">
+        <div className="absolute top-6 right-6 z-[1001] flex flex-col gap-4 items-end">
           <motion.button 
-            whileHover={{ scale: 1.02 }}
+            whileHover={{ scale: 1.02, y: -2 }}
             whileTap={{ scale: 0.98 }}
             onClick={() => setIsReportModalOpen(true)}
-            className="bg-red-600 hover:bg-red-700 text-white px-5 py-3 rounded-xl shadow-xl flex items-center gap-2 font-bold text-sm transition-colors border-t border-white/20"
+            className="bg-red-600 hover:bg-red-500 text-white px-8 py-4 rounded-[22px] shadow-[0_20px_40px_-5px_rgba(220,38,38,0.3)] flex items-center gap-3 font-black text-[11px] tracking-[0.2em] transition-all border-t border-white/20 select-none cursor-pointer"
           >
-            <Plus className="w-5 h-5" />
-            <span>REPORT INCIDENT</span>
+            <Plus className="w-4 h-4 stroke-[3px]" />
+            NEW INCIDENT
           </motion.button>
 
-          <motion.button 
-            whileHover={{ scale: 1.05 }}
-            whileTap={{ scale: 0.95 }}
-            onClick={handleMyLocation}
-            className="bg-white dark:bg-zinc-900 p-4 rounded-2xl shadow-lg border border-zinc-200 dark:border-zinc-800 text-zinc-800 dark:text-zinc-100 transition-all"
-            title="My Location"
-          >
-            <Navigation className="w-5 h-5 fill-current" />
-          </motion.button>
+          <div className="flex flex-col gap-3">
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              onClick={handleMyLocation}
+              className="glass-island p-4 rounded-[22px] text-white transition-all hover:bg-white/10 outline-none"
+              title="Locate Responders"
+            >
+              <Navigation className="w-5 h-5 fill-current" />
+            </motion.button>
+            
+            <motion.button 
+              whileHover={{ scale: 1.1 }}
+              whileTap={{ scale: 0.9 }}
+              className="glass-island p-4 rounded-[22px] text-white/40 transition-all cursor-not-allowed outline-none"
+            >
+              <Layers className="w-5 h-5" />
+            </motion.button>
+          </div>
         </div>
 
         <MapWidget alerts={alerts} focusLocation={focusLocation} />
 
-        {/* Mobile Mini-Feed Pull-up */}
+        {/* Floating Mobile Summary Bar */}
         <AnimatePresence>
           {!isSidebarOpen && (
             <motion.div 
-              initial={{ y: 20, opacity: 0 }}
+              initial={{ y: 50, opacity: 0 }}
               animate={{ y: 0, opacity: 1 }}
-              exit={{ y: 20, opacity: 0 }}
+              exit={{ y: 50, opacity: 0 }}
               onClick={() => setIsSidebarOpen(true)}
-              className="md:hidden absolute bottom-6 left-1/2 -translate-x-1/2 z-[1001] bg-white/95 dark:bg-zinc-900/95 backdrop-blur-md px-6 py-3 rounded-full border border-zinc-200 dark:border-zinc-800 shadow-xl flex items-center gap-3 cursor-pointer"
+              className="md:hidden absolute bottom-10 left-6 right-6 z-[1001] glass-island px-8 py-5 rounded-[28px] flex items-center justify-between cursor-pointer active:scale-95 transition-transform"
             >
-              <div className="h-2 w-2 rounded-full bg-red-600 animate-pulse"></div>
-              <span className="text-xs font-bold text-zinc-900 dark:text-zinc-100 uppercase tracking-tight">
-                {alerts.length} Active Alerts
-              </span>
+              <div className="flex items-center gap-4">
+                <div className="relative flex h-3 w-3">
+                  <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-red-400 opacity-75"></span>
+                  <span className="relative inline-flex rounded-full h-3 w-3 bg-red-600 shadow-[0_0_12px_rgba(220,38,38,0.6)]"></span>
+                </div>
+                <div className="flex flex-col">
+                  <span className="text-[11px] font-black tracking-widest text-white uppercase italic">Active Grid</span>
+                  <span className="text-[9px] font-bold text-white/40 uppercase tracking-widest">{alerts.length} Incidents Live</span>
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <span className="text-[10px] font-black text-white/60 uppercase tracking-widest bg-white/5 px-3 py-1 rounded-full border border-white/10">Expand List</span>
+              </div>
             </motion.div>
           )}
         </AnimatePresence>
