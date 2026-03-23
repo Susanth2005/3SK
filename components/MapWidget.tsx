@@ -152,8 +152,8 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
 
   return (
     <div className="relative w-full h-full">
-      {/* Map Layer Switcher Button */}
-      <div className="absolute top-4 right-4 z-[900] flex flex-col items-end gap-2">
+      {/* Map Layer Switcher Button — bottom-left, away from page controls */}
+      <div className="absolute bottom-6 left-4 z-[900] flex flex-col-reverse items-start gap-2">
         <button
           onClick={() => setShowLayerMenu(prev => !prev)}
           className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-widest shadow-xl hover:bg-black/90 transition-all"
