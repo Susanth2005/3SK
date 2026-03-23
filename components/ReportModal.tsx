@@ -29,7 +29,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
   const searchRef = useRef<HTMLDivElement>(null);
 
   const [formData, setFormData] = useState({
-    type: 'Hazard',
+    type: 'General',
     contact: '',
     message: '',
     lat: '10.8505',
@@ -98,11 +98,12 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
         lng: parseFloat(formData.lng),
         source: 'manual',
         reporter: user.email,
-        timestamp: Date.now()
+        timestamp: Date.now(),
+        status: 'pending'
       });
       
       onClose();
-      setFormData({ type: 'Hazard', contact: '', message: '', lat: '10.8505', lng: '76.2711' });
+      setFormData({ type: 'General', contact: '', message: '', lat: '10.8505', lng: '76.2711' });
       setSearchQuery('');
     } catch (error) {
       console.error(error);
@@ -152,7 +153,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
             
             {/* INCIDENT TYPE SELECTOR */}
             <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
-              {['Fire', 'Medical', 'Hazard', 'General'].map((t) => (
+              {['Fire', 'Accident', 'Medical', 'General'].map((t) => (
                 <button
                   key={t}
                   type="button"

@@ -22,7 +22,8 @@ export async function POST(req: Request) {
       lat: Number(lat),
       lng: Number(lng),
       message: message || "Fire detected by hardware sensor",
-      timestamp: Date.now()
+      timestamp: Date.now(),
+      status: 'pending'
     };
 
     // Push the event to Firebase Realtime Database

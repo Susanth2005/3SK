@@ -24,16 +24,23 @@ export default function RespondButton({ alertId, responders = {} }: RespondButto
       return;
     }
     
-    const alertRef = ref(database, `alerts/${alertId}/responders`);
+    const alertRef = ref(database, `alerts/${alertId}`);
     try {
-      await runTransaction(alertRef, (currentResponders) => {
-        if (!currentResponders) currentResponders = {};
-        if (currentResponders[user.uid]) {
-          currentResponders[user.uid] = null;
+      await runTransaction(alertRef, (alert) => {
+        if (!alert) return alert;
+        if (!alert.responders) alert.responders = {};
+        
+        if (alert.responders[user.uid]) {
+          alert.responders[user.uid] = null;
+          // If no one is left responding, maybe keep as in_progress or set back? 
+          // For now, once it starts, it stays in_progress unless resolved.
         } else {
-          currentResponders[user.uid] = true;
+          alert.responders[user.uid] = true;
+          if (alert.status === 'pending') {
+            alert.status = 'in_progress';
+          }
         }
-        return currentResponders;
+        return alert;
       });
     } catch (error) {
       console.error("Failed to update responder status:", error);

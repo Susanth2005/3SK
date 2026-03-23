@@ -3,8 +3,49 @@
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import RespondButton from './RespondButton';
-import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert } from 'lucide-react';
+import { ref, update } from 'firebase/database';
+import { database } from '@/lib/firebase';
+import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert, Flame, Car, Stethoscope, Info, CheckCircle2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+
+const TYPE_CONFIG: Record<string, { color: string, icon: any, label: string, glow: string }> = {
+  'Fire': { 
+    color: 'text-red-500 border-red-500/40 bg-red-600/20', 
+    icon: Flame, 
+    label: 'Fire Incident',
+    glow: 'bg-red-600'
+  },
+  'Accident': { 
+    color: 'text-orange-500 border-orange-500/40 bg-orange-600/20', 
+    icon: Car, 
+    label: 'Road Accident',
+    glow: 'bg-orange-600'
+  },
+  'Medical': { 
+    color: 'text-blue-500 border-blue-500/40 bg-blue-600/20', 
+    icon: Stethoscope, 
+    label: 'Medical Emergency',
+    glow: 'bg-blue-600'
+  },
+  'General': { 
+    color: 'text-emerald-500 border-emerald-500/40 bg-emerald-600/20', 
+    icon: Info, 
+    label: 'General Alert',
+    glow: 'bg-emerald-600'
+  },
+  'default': { 
+    color: 'text-zinc-500 border-zinc-500/40 bg-zinc-600/20', 
+    icon: Activity, 
+    label: 'Detection',
+    glow: 'bg-zinc-600'
+  }
+};
+
+const STATUS_CONFIG: Record<string, { color: string, label: string, dot: string }> = {
+  'pending': { color: 'text-amber-500/60', label: 'Pending', dot: 'bg-amber-500' },
+  'in_progress': { color: 'text-blue-500/60', label: 'In Progress', dot: 'bg-blue-500' },
+  'resolved': { color: 'text-emerald-500/60', label: 'Resolved', dot: 'bg-emerald-500' }
+};
 
 interface AlertData {
   id: string;
@@ -19,6 +60,7 @@ interface AlertData {
   responders?: Record<string, boolean>;
   deviceId?: string;
   locationName?: string;
+  status?: 'pending' | 'in_progress' | 'resolved';
 }
 
 interface SidebarProps {
@@ -43,6 +85,18 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
       Notification.requestPermission().then((perm) => {
         setPermission(perm);
       });
+    }
+  };
+  
+  const handleResolve = async (alertId: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (!confirm("Are you sure you want to mark this incident as RESOLVED?")) return;
+    
+    const alertRef = ref(database, `alerts/${alertId}`);
+    try {
+      await update(alertRef, { status: 'resolved' });
+    } catch (error) {
+      console.error("Failed to resolve alert:", error);
     }
   };
 
@@ -130,23 +184,40 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                   onClick={() => onFocusLocation?.({ lat: alert.lat, lng: alert.lng })}
                   className="relative rounded-[32px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 p-6 transition-all duration-500 hover:bg-white/[0.06] hover:border-white/20 hover:-translate-y-1 shadow-2xl group cursor-pointer active:scale-[0.97] overflow-hidden"
                 >
-                  <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-10 transition-all duration-700 group-hover:opacity-30 pointer-events-none ${
-                    alert.type === 'Fire' ? 'bg-red-600' : 'bg-cyan-500'
-                  }`}></div>
+                  {(() => {
+                    const config = TYPE_CONFIG[alert.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.default;
+                    const Icon = config.icon;
+                    return (
+                      <>
+                        <div className={`absolute top-0 right-0 w-32 h-32 blur-[60px] opacity-10 transition-all duration-700 group-hover:opacity-30 pointer-events-none ${config.glow}`}></div>
 
-                  <div className="flex justify-between items-start mb-5 h-6">
-                    <div className={`px-3 py-1 rounded-full text-[10px] font-black tracking-widest uppercase border transition-all ${
-                      alert.type === 'Fire' ? 'bg-red-600/20 text-red-500 border-red-500/40 group-hover:bg-red-600 group-hover:text-white' : 'bg-cyan-600/20 text-cyan-500 border-cyan-500/40 group-hover:bg-cyan-600 group-hover:text-white'
-                    }`}>
-                      {alert.type || 'Detection'}
-                    </div>
-                    <div className="flex items-center gap-2 text-white/30 group-hover:text-white/60 transition-colors">
-                      <Clock className="w-3.5 h-3.5 stroke-[2.5]" />
-                      <span className="text-[11px] font-black tracking-[0.1em] italic">
-                        {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                      </span>
-                    </div>
-                  </div>
+                        <div className="flex justify-between items-start mb-5">
+                          <div className={`px-4 py-1.5 rounded-full text-[10px] font-black tracking-widest uppercase border transition-all flex items-center gap-2 ${config.color} group-hover:brightness-125`}>
+                            <Icon className="w-3.5 h-3.5" />
+                            {config.label}
+                          </div>
+                          <div className="flex flex-col items-end gap-1">
+                             <div className="flex items-center gap-2 text-white/30 group-hover:text-white/60 transition-colors">
+                              <Clock className="w-3.5 h-3.5 stroke-[2.5]" />
+                              <span className="text-[11px] font-black tracking-[0.1em] italic">
+                                {new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                              </span>
+                            </div>
+                            {(() => {
+                              const status = alert.status || 'pending';
+                              const sLink = STATUS_CONFIG[status];
+                              return (
+                                <div className="flex items-center gap-1.5">
+                                  <span className={`w-1.5 h-1.5 rounded-full ${sLink.dot} ${status === 'pending' ? 'animate-pulse' : ''}`}></span>
+                                  <span className={`text-[9px] font-black uppercase tracking-widest italic ${sLink.color}`}>{sLink.label}</span>
+                                </div>
+                              );
+                            })()}
+                          </div>
+                        </div>
+                      </>
+                    );
+                  })()}
                   
                   {alert.locationName && (
                     <div className="text-white font-black text-sm mb-3 flex items-center gap-3 tracking-tighter group-hover:translate-x-1 transition-transform">
@@ -175,6 +246,18 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                       <RespondButton alertId={alert.id} responders={alert.responders} />
                     </div>
                   </div>
+
+                  {alert.status !== 'resolved' && (
+                    <motion.button
+                      whileHover={{ scale: 1.02 }}
+                      whileTap={{ scale: 0.98 }}
+                      onClick={(e) => handleResolve(alert.id, e)}
+                      className="mt-4 w-full py-3 rounded-2xl bg-emerald-600/10 hover:bg-emerald-600/20 border border-emerald-500/20 text-emerald-500 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all group/res"
+                    >
+                      <CheckCircle2 className="w-4 h-4 group-hover/res:scale-110 transition-transform" />
+                      Mark Protocol Resolved
+                    </motion.button>
+                  )}
                 </motion.div>
               ))
             )}
