@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { MapContainer, TileLayer, Marker, Popup, useMap, LayersControl, Polyline } from 'react-leaflet';
+import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
 import RespondButton from './RespondButton';
@@ -27,6 +27,34 @@ const FireIcon = L.icon({
   shadowSize: [41, 41]
 });
 
+// Map layer configs
+const MAP_LAYERS = [
+  {
+    key: 'street',
+    label: 'Street',
+    icon: '🗺️',
+    url: 'https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png',
+    attribution: '&copy; <a href="https://carto.com/attributions">CARTO</a>',
+    maxZoom: 19,
+  },
+  {
+    key: 'satellite',
+    label: 'Satellite',
+    icon: '🛰️',
+    url: 'http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxZoom: 20,
+  },
+  {
+    key: 'hybrid',
+    label: 'Hybrid',
+    icon: '🌍',
+    url: 'http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}',
+    attribution: '&copy; Google',
+    maxZoom: 20,
+  },
+];
+
 interface AlertData {
   id: string;
   lat: number;
@@ -47,7 +75,6 @@ interface MapWidgetProps {
   focusLocation?: { lat: number; lng: number } | null;
 }
 
-// Resets map smoothly if an unprompted new alert drops
 function RecenterAutomatically({ lat, lng }: { lat: number, lng: number }) {
   const map = useMap();
   useEffect(() => {
@@ -56,7 +83,6 @@ function RecenterAutomatically({ lat, lng }: { lat: number, lng: number }) {
   return null;
 }
 
-// Drives map interactions requested via Sidebar Clicks
 function MapFocusHandler({ location }: { location?: { lat: number, lng: number } | null }) {
   const map = useMap();
   useEffect(() => {
@@ -67,12 +93,26 @@ function MapFocusHandler({ location }: { location?: { lat: number, lng: number }
   return null;
 }
 
+// Switches tiles dynamically
+function TileLayerSwitcher({ layerKey }: { layerKey: string }) {
+  const layer = MAP_LAYERS.find(l => l.key === layerKey) || MAP_LAYERS[0];
+  return (
+    <TileLayer
+      attribution={layer.attribution}
+      url={layer.url}
+      maxZoom={layer.maxZoom}
+    />
+  );
+}
+
 export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
   const defaultCenter = [10.8505, 76.2711] as [number, number];
   const center = alerts.length > 0 ? [alerts[0].lat, alerts[0].lng] : defaultCenter;
   
   const [routePolyline, setRoutePolyline] = useState<[number, number][] | null>(null);
   const [routingLoading, setRoutingLoading] = useState(false);
+  const [activeLayer, setActiveLayer] = useState('street');
+  const [showLayerMenu, setShowLayerMenu] = useState(false);
 
   const fetchRoute = async (destLat: number, destLng: number) => {
     if (!navigator.geolocation) {
@@ -108,91 +148,109 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
     });
   };
 
+  const currentLayer = MAP_LAYERS.find(l => l.key === activeLayer) || MAP_LAYERS[0];
+
   return (
-    <MapContainer 
-      center={center as [number, number]} 
-      zoom={alerts.length > 0 ? 13 : 7} 
-      style={{ height: '100%', width: '100%' }}
-      className="z-0 outline-none"
-    >
-      <LayersControl position="topright">
-        <LayersControl.BaseLayer checked name="Clean Street View">
-          <TileLayer
-            attribution='&copy; <a href="https://carto.com/attributions">CARTO</a>'
-            url="https://{s}.basemaps.cartocdn.com/rastertiles/voyager/{z}/{x}/{y}{r}.png"
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="Google Satellite">
-          <TileLayer
-            attribution="&copy; Google"
-            url="http://mt0.google.com/vt/lyrs=s&hl=en&x={x}&y={y}&z={z}"
-            maxZoom={20}
-          />
-        </LayersControl.BaseLayer>
-        <LayersControl.BaseLayer name="Google Hybrid (Sat + Roads)">
-          <TileLayer
-            attribution="&copy; Google"
-            url="http://mt0.google.com/vt/lyrs=y&hl=en&x={x}&y={y}&z={z}"
-            maxZoom={20}
-          />
-        </LayersControl.BaseLayer>
-      </LayersControl>
-      
-      <MapFocusHandler location={focusLocation} />
-      {alerts.length > 0 && !focusLocation && !routePolyline && <RecenterAutomatically lat={alerts[0].lat} lng={alerts[0].lng} />}
+    <div className="relative w-full h-full">
+      {/* Map Layer Switcher Button */}
+      <div className="absolute top-4 right-4 z-[900] flex flex-col items-end gap-2">
+        <button
+          onClick={() => setShowLayerMenu(prev => !prev)}
+          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-widest shadow-xl hover:bg-black/90 transition-all"
+          title="Switch Map View"
+        >
+          <span className="text-base">{currentLayer.icon}</span>
+          <span>{currentLayer.label}</span>
+          <svg className={`w-3.5 h-3.5 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
+            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
+          </svg>
+        </button>
 
-      {routePolyline && <Polyline positions={routePolyline} color="#3b82f6" weight={5} opacity={0.9} dashArray="10, 10" />}
+        {showLayerMenu && (
+          <div className="flex flex-col gap-1.5 bg-black/85 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-2xl">
+            {MAP_LAYERS.map(layer => (
+              <button
+                key={layer.key}
+                onClick={() => { setActiveLayer(layer.key); setShowLayerMenu(false); }}
+                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
+                  activeLayer === layer.key 
+                    ? 'bg-white/20 text-white' 
+                    : 'text-white/60 hover:bg-white/10 hover:text-white'
+                }`}
+              >
+                <span className="text-base">{layer.icon}</span>
+                {layer.label}
+              </button>
+            ))}
+          </div>
+        )}
+      </div>
 
-      {alerts.map((alert) => (
-        <Marker key={alert.id} position={[alert.lat, alert.lng]} icon={FireIcon}>
-          <Popup>
-            <div className="font-sans min-w-[220px]">
-              <h3 className="font-bold text-red-600 mb-1">
-                {alert.type ? alert.type.toUpperCase() : 'INCIDENT DETECTED'}
-              </h3>
-              
-              {alert.locationName && (
-                <div className="font-bold text-xs text-zinc-900 mb-1">
-                  📍 {alert.locationName}
-                </div>
-              )}
+      <MapContainer 
+        center={center as [number, number]} 
+        zoom={alerts.length > 0 ? 13 : 7} 
+        style={{ height: '100%', width: '100%' }}
+        className="z-0 outline-none"
+        zoomControl={false}
+      >
+        <TileLayerSwitcher layerKey={activeLayer} />
+        
+        <MapFocusHandler location={focusLocation} />
+        {alerts.length > 0 && !focusLocation && !routePolyline && <RecenterAutomatically lat={alerts[0].lat} lng={alerts[0].lng} />}
 
-              <p className="text-sm text-zinc-800 mb-2">{alert.message}</p>
-              
-              {alert.contact && (
-                <div className="px-2 py-1 bg-red-50 border border-red-100 rounded text-sm text-red-900 font-medium mb-2">
-                  📞 {alert.contact}
-                </div>
-              )}
+        {routePolyline && <Polyline positions={routePolyline} color="#3b82f6" weight={5} opacity={0.9} dashArray="10, 10" />}
 
-              <p className="text-xs text-zinc-500 mt-2 border-t border-zinc-200 pt-1 flex justify-between items-center">
-                <span>{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
-                {alert.source === 'manual' ? (
-                  <span className="bg-amber-100 text-amber-800 px-1 rounded font-medium ml-2">Manual</span>
-                ) : (
-                  <span className="bg-blue-100 text-blue-800 px-1 rounded font-medium ml-2">
-                    {alert.deviceId ? alert.deviceId : 'Sensor'}
-                  </span>
+        {alerts.map((alert) => (
+          <Marker key={alert.id} position={[alert.lat, alert.lng]} icon={FireIcon}>
+            <Popup>
+              <div className="font-sans min-w-[220px]">
+                <h3 className="font-bold text-red-600 mb-1">
+                  {alert.type ? alert.type.toUpperCase() : 'INCIDENT DETECTED'}
+                </h3>
+                
+                {alert.locationName && (
+                  <div className="font-bold text-xs text-zinc-900 mb-1">
+                    📍 {alert.locationName}
+                  </div>
                 )}
-              </p>
-              
-              <div className="flex gap-2 mt-3 w-full">
-                <div className="flex-[1.2]">
-                  <RespondButton alertId={alert.id} responders={alert.responders} />
+
+                <p className="text-sm text-zinc-800 mb-2">{alert.message}</p>
+                
+                {alert.contact && (
+                  <div className="px-2 py-1 bg-red-50 border border-red-100 rounded text-sm text-red-900 font-medium mb-2">
+                    📞 {alert.contact}
+                  </div>
+                )}
+
+                <p className="text-xs text-zinc-500 mt-2 border-t border-zinc-200 pt-1 flex justify-between items-center">
+                  <span>{new Date(alert.timestamp).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}</span>
+                  {alert.source === 'manual' ? (
+                    <span className="bg-amber-100 text-amber-800 px-1 rounded font-medium ml-2">Manual</span>
+                  ) : (
+                    <span className="bg-blue-100 text-blue-800 px-1 rounded font-medium ml-2">
+                      {alert.deviceId ? alert.deviceId : 'Sensor'}
+                    </span>
+                  )}
+                </p>
+                
+                <div className="flex gap-2 mt-3 w-full">
+                  <div className="flex-[1.2]">
+                    <RespondButton alertId={alert.id} responders={alert.responders} />
+                  </div>
+                  <button 
+                    onClick={() => fetchRoute(alert.lat, alert.lng)}
+                    disabled={routingLoading}
+                    className="flex-1 mt-3 flex items-center justify-center bg-zinc-100 border border-zinc-300 text-zinc-800 px-2 py-1.5 rounded-md text-[11px] font-bold tracking-wide hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                    title="Get Driving Directions"
+                  >
+                    {routingLoading ? '📍...' : '📍 ROUTE'}
+                  </button>
                 </div>
-                <button 
-                  onClick={() => fetchRoute(alert.lat, alert.lng)}
-                  disabled={routingLoading}
-                  className="flex-1 mt-3 flex items-center justify-center bg-zinc-100 border border-zinc-300 text-zinc-800 px-2 py-1.5 rounded-md text-[11px] font-bold tracking-wide hover:bg-zinc-200 transition-colors disabled:opacity-50"
-                  title="Get Driving Directions"
-                >
-                  {routingLoading ? '📍...' : '📍 ROUTE'}
-                </button>
               </div>
-            </div>
-          </Popup>
-        </Marker>
-      ))}
-    </MapContainer>
+            </Popup>
+          </Marker>
+        ))}
+      </MapContainer>
+    </div>
   );
 }
