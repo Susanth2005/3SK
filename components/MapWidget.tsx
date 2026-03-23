@@ -152,38 +152,24 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
 
   return (
     <div className="relative w-full h-full">
-      {/* Map Layer Switcher Button — bottom-left, away from page controls */}
-      <div className="absolute bottom-6 left-4 z-[900] flex flex-col-reverse items-start gap-2">
-        <button
-          onClick={() => setShowLayerMenu(prev => !prev)}
-          className="flex items-center gap-2 px-4 py-2.5 rounded-2xl bg-black/80 backdrop-blur-xl border border-white/20 text-white text-xs font-black uppercase tracking-widest shadow-xl hover:bg-black/90 transition-all"
-          title="Switch Map View"
-        >
-          <span className="text-base">{currentLayer.icon}</span>
-          <span>{currentLayer.label}</span>
-          <svg className={`w-3.5 h-3.5 transition-transform ${showLayerMenu ? 'rotate-180' : ''}`} fill="none" viewBox="0 0 24 24" stroke="currentColor" strokeWidth={3}>
-            <path strokeLinecap="round" strokeLinejoin="round" d="M19 9l-7 7-7-7" />
-          </svg>
-        </button>
-
-        {showLayerMenu && (
-          <div className="flex flex-col gap-1.5 bg-black/85 backdrop-blur-xl border border-white/20 rounded-2xl p-2 shadow-2xl">
-            {MAP_LAYERS.map(layer => (
-              <button
-                key={layer.key}
-                onClick={() => { setActiveLayer(layer.key); setShowLayerMenu(false); }}
-                className={`flex items-center gap-2.5 px-4 py-2 rounded-xl text-xs font-black uppercase tracking-widest transition-all ${
-                  activeLayer === layer.key 
-                    ? 'bg-white/20 text-white' 
-                    : 'text-white/60 hover:bg-white/10 hover:text-white'
-                }`}
-              >
-                <span className="text-base">{layer.icon}</span>
-                {layer.label}
-              </button>
-            ))}
-          </div>
-        )}
+      {/* Map Layer Switcher — Positioned top-center to clear all sidebars and controls */}
+      <div className="absolute top-28 left-1/2 -translate-x-1/2 z-[1000] flex flex-col items-center gap-2">
+        <div className="flex bg-black/80 backdrop-blur-xl border border-white/10 rounded-2xl p-1 shadow-2xl overflow-hidden">
+          {MAP_LAYERS.map(layer => (
+            <button
+              key={layer.key}
+              onClick={() => { setActiveLayer(layer.key); setShowLayerMenu(false); }}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+                activeLayer === layer.key 
+                  ? 'bg-white/20 text-white shadow-inner' 
+                  : 'text-white/40 hover:bg-white/5 hover:text-white'
+              }`}
+            >
+              <span className="text-sm">{layer.icon}</span>
+              <span className="hidden sm:inline">{layer.label}</span>
+            </button>
+          ))}
+        </div>
       </div>
 
       <MapContainer 

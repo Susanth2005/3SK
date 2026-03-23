@@ -139,16 +139,16 @@ export default function Home() {
           <motion.div 
             initial={{ x: 20, opacity: 0 }}
             animate={{ x: 0, opacity: 1 }}
-            className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[20px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-2xl"
+            className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[24px] bg-zinc-950/90 backdrop-blur-2xl border border-white/20 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]"
           >
             <div className="flex flex-col items-center mr-4">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
+              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
               <span className="text-lg font-black italic text-white leading-none">{alerts.length}</span>
             </div>
-            <div className="w-[1px] h-6 bg-white/10"></div>
+            <div className="w-[1px] h-6 bg-white/20"></div>
             <div className="flex flex-col items-center">
-              <span className="text-[9px] font-black text-white/30 uppercase tracking-widest leading-none mb-1">Response Latency</span>
-              <span className="text-lg font-black italic text-emerald-500 leading-none">0.2ms</span>
+              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Response Latency</span>
+              <span className="text-lg font-black italic text-emerald-400 leading-none">0.2ms</span>
             </div>
           </motion.div>
         </div>
