@@ -126,7 +126,7 @@ export default function Home() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-none">
-                Titan Grid
+                Live Accident Cases
               </h1>
               <div className="flex items-center gap-2 mt-1.5 opacity-60">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
@@ -174,7 +174,7 @@ export default function Home() {
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsReportModalOpen(true)}
-            className="relative overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black px-8 py-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(255,0,60,0.4)] transition-all text-xs tracking-[0.2em] uppercase group"
+            className="relative lg:order-first order-last overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black px-8 py-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(255,0,60,0.4)] transition-all text-xs tracking-[0.2em] uppercase group"
           >
             <div className="flex items-center gap-4 relative z-10">
                <Zap className="w-5 h-5 fill-white animate-pulse" />
@@ -220,7 +220,7 @@ export default function Home() {
                   <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.8)] border border-white/20"></span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-black italic tracking-widest text-white uppercase leading-none">Titan Grid Live</span>
+                  <span className="text-[12px] font-black italic tracking-widest text-white uppercase leading-none">Live Accident Cases</span>
                   <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1.5">Processing {alerts.length} Nodes</span>
                 </div>
               </div>

@@ -138,7 +138,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                </div>
                <div className="flex flex-col">
                  <h2 className="text-xl font-black italic tracking-tighter text-white uppercase leading-none">
-                    Alpha Terminal
+                    Live Alert Cases
                  </h2>
                  <span className="text-[9px] font-black text-white/40 tracking-[0.4em] uppercase mt-2">Active Surveillance</span>
                </div>
