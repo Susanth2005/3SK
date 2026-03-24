@@ -245,7 +245,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                             </div>
                             {(() => {
                               const status = alert.status || 'pending';
-                              const sLink = STATUS_CONFIG[status];
+                              const sLink = STATUS_CONFIG[status] || STATUS_CONFIG.pending;
                               return (
                                 <div className="flex items-center gap-1.5">
                                   <span className={`w-1.5 h-1.5 rounded-full ${sLink.dot} ${status === 'pending' ? 'animate-pulse' : ''}`}></span>
