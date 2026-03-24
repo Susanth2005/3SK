@@ -5,7 +5,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import RespondButton from './RespondButton';
 import { ref, update } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert, Flame, Car, Stethoscope, Info, CheckCircle2 } from 'lucide-react';
+import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert, Flame, Car, Stethoscope, Info, CheckCircle2, Search, Filter } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
 
 const TYPE_CONFIG: Record<string, { color: string, icon: any, label: string, glow: string }> = {
@@ -73,6 +73,10 @@ interface SidebarProps {
 export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose }: SidebarProps) {
   const { user, logout } = useAuth();
   const [permission, setPermission] = useState<string>('default');
+  const [searchQuery, setSearchQuery] = useState('');
+  const [activeCategory, setActiveCategory] = useState('All');
+
+  const CATEGORIES = ['All', 'Fire', 'Accident', 'Medical', 'General'];
 
   useEffect(() => {
     if (typeof window !== 'undefined' && 'Notification' in window) {
@@ -147,34 +151,70 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
               <X className="w-5 h-5 text-white/60" />
             </button>
           </div>
-          
-          <div className="grid grid-cols-2 gap-3 relative z-10">
-            <div className="bg-white/5 rounded-2xl px-5 py-4 border border-white/10 hover:bg-white/10 transition-colors">
-              <span className="block text-[9px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight mb-2">Live Nodes</span>
-              <span className="text-xl font-black text-white italic leading-none">{alerts.length}</span>
+
+          <div className="mt-8 space-y-4 relative z-10">
+            {/* Search Bar */}
+            <div className="relative group">
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-red-500 transition-colors" />
+              <input 
+                type="text" 
+                placeholder="Search by location..." 
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all"
+              />
             </div>
-            <div className="bg-white/5 rounded-2xl px-5 py-4 border border-white/10 hover:bg-white/10 transition-colors">
-              <span className="block text-[9px] font-black text-white/40 uppercase tracking-[0.2em] leading-tight mb-2">Alpha Sec</span>
-              <span className="text-xl font-black text-emerald-400 italic leading-none">99%</span>
+
+            {/* Category Tabs */}
+            <div className="flex gap-2 overflow-x-auto pb-2 no-scrollbar custom-scrollbar">
+              {CATEGORIES.map(cat => (
+                <button
+                  key={cat}
+                  onClick={() => setActiveCategory(cat)}
+                  className={`
+                    shrink-0 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all
+                    ${activeCategory === cat 
+                      ? 'bg-red-600 border-red-500 text-white shadow-[0_5px_15px_-3px_rgba(220,38,38,0.4)]' 
+                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
+                    }
+                  `}
+                >
+                  {cat}
+                </button>
+              ))}
             </div>
           </div>
         </div>
 
         <div className="flex-1 overflow-y-auto px-6 py-8 space-y-5 custom-scrollbar relative z-10">
           <AnimatePresence mode="popLayout">
-            {alerts.length === 0 ? (
-              <motion.div 
-                initial={{ opacity: 0 }} 
-                animate={{ opacity: 1 }} 
-                className="h-64 flex flex-col items-center justify-center gap-6"
-              >
-                <div className="p-8 bg-white/5 rounded-[40px] border border-white/10 shadow-inner">
-                  <Radio className="w-10 h-10 text-white/20 animate-pulse" />
-                </div>
-                <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] italic">Scanning Frequencies...</p>
-              </motion.div>
-            ) : (
-              alerts.map((alert, idx) => (
+            {(() => {
+              const filtered = alerts.filter(alert => {
+                const matchesCategory = activeCategory === 'All' || alert.type === activeCategory;
+                const matchesSearch = !searchQuery || 
+                  (alert.locationName?.toLowerCase().includes(searchQuery.toLowerCase())) ||
+                  (alert.message?.toLowerCase().includes(searchQuery.toLowerCase()));
+                return matchesCategory && matchesSearch;
+              });
+
+              if (filtered.length === 0) {
+                return (
+                  <motion.div 
+                    initial={{ opacity: 0 }} 
+                    animate={{ opacity: 1 }} 
+                    className="h-64 flex flex-col items-center justify-center gap-6"
+                  >
+                    <div className="p-8 bg-white/5 rounded-[40px] border border-white/10 shadow-inner">
+                      <Radio className="w-10 h-10 text-white/20 animate-pulse" />
+                    </div>
+                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] italic">
+                      {searchQuery || activeCategory !== 'All' ? 'No matches found' : 'Scanning Frequencies...'}
+                    </p>
+                  </motion.div>
+                );
+              }
+
+              return filtered.map((alert, idx) => (
                 <motion.div 
                   layout
                   initial={{ opacity: 0, x: -30, scale: 0.9 }}
@@ -259,8 +299,8 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                     </motion.button>
                   )}
                 </motion.div>
-              ))
-            )}
+              ));
+            })()}
           </AnimatePresence>
         </div>
 
