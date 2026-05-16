@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import dynamic from 'next/dynamic';
 import Sidebar from '@/components/Sidebar';
 import { ref, onValue, query, orderByChild, limitToLast } from 'firebase/database';
@@ -15,7 +16,7 @@ const MapWidget = dynamic(() => import('@/components/MapWidget'), {
     <div className="absolute inset-0 flex items-center justify-center bg-black">
       <div className="flex flex-col items-center gap-4">
         <div className="w-12 h-12 border-[4px] border-white/5 border-t-red-600 rounded-full animate-spin"></div>
-        <p className="text-white/20 font-black tracking-[0.5em] text-[10px] uppercase italic">Quantum Link Active</p>
+        <p className="text-white/60 font-black tracking-[0.5em] text-[10px] uppercase italic">System Active</p>
       </div>
     </div>
   )
@@ -60,6 +61,16 @@ export default function Home() {
         count++;
       }, 2000);
     }
+    
+    // In-app Toast Notification
+    toast.error(`NEW INCIDENT: ${alertData.type || 'Alert'}`, {
+      description: alertData.message,
+      duration: 10000,
+      action: {
+        label: "View on Map",
+        onClick: () => setFocusLocation({ lat: alertData.lat, lng: alertData.lng })
+      }
+    });
   };
 
   useEffect(() => {
@@ -126,11 +137,11 @@ export default function Home() {
             </div>
             <div className="flex flex-col">
               <h1 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-none">
-                Live Accident Cases
+                Active Incidents
               </h1>
-              <div className="flex items-center gap-2 mt-1.5 opacity-60">
+              <div className="flex items-center gap-2 mt-1.5 opacity-80">
                 <span className="w-1.5 h-1.5 rounded-full bg-emerald-500 animate-pulse"></span>
-                <span className="text-[10px] font-black uppercase tracking-[0.3em]">Quantum Core Active</span>
+                <span className="text-[10px] font-black uppercase tracking-[0.3em]">System Online</span>
               </div>
             </div>
           </motion.div>
@@ -142,12 +153,12 @@ export default function Home() {
             className="hidden lg:flex items-center gap-4 h-14 px-6 rounded-[24px] bg-zinc-950/90 backdrop-blur-2xl border border-white/20 shadow-[0_20px_40px_-10px_rgba(0,0,0,0.5)]"
           >
             <div className="flex flex-col items-center mr-4">
-              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
+              <span className="text-[9px] font-black text-white/70 uppercase tracking-widest leading-none mb-1">Live Incidents</span>
               <span className="text-lg font-black italic text-white leading-none">{alerts.length}</span>
             </div>
             <div className="w-[1px] h-6 bg-white/20"></div>
             <div className="flex flex-col items-center">
-              <span className="text-[9px] font-black text-white/40 uppercase tracking-widest leading-none mb-1">Response Latency</span>
+              <span className="text-[9px] font-black text-white/70 uppercase tracking-widest leading-none mb-1">Response Latency</span>
               <span className="text-lg font-black italic text-emerald-400 leading-none">0.2ms</span>
             </div>
           </motion.div>
@@ -174,11 +185,12 @@ export default function Home() {
             whileHover={{ scale: 1.05, y: -2 }}
             whileTap={{ scale: 0.95 }}
             onClick={() => setIsReportModalOpen(true)}
-            className="relative lg:order-first order-last overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black px-8 py-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(255,0,60,0.4)] transition-all text-xs tracking-[0.2em] uppercase group"
+            aria-label="Report new incident"
+            className="relative lg:order-first order-last overflow-hidden bg-gradient-to-r from-red-600 to-red-500 text-white font-black px-8 py-4 rounded-2xl shadow-[0_15px_30px_-5px_rgba(255,0,60,0.4)] transition-all text-xs tracking-[0.2em] uppercase group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
           >
             <div className="flex items-center gap-4 relative z-10">
                <Zap className="w-5 h-5 fill-white animate-pulse" />
-               <span>Broadcast Incident</span>
+               <span>Report Incident</span>
             </div>
             <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-700" />
           </motion.button>
@@ -188,8 +200,9 @@ export default function Home() {
               whileHover={{ scale: 1.15, rotate: 10 }}
               whileTap={{ scale: 0.9 }}
               onClick={handleMyLocation}
-              className="w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all hover:bg-white/10"
-              title="Locate Transponder"
+              aria-label="My current location"
+              className="w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all hover:bg-white/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+              title="My Location"
             >
               <Navigation className="w-6 h-6 fill-current" />
             </motion.button>
@@ -197,7 +210,8 @@ export default function Home() {
               whileHover={{ scale: 1.15 }}
               whileTap={{ scale: 0.9 }}
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all"
+              aria-label="Open incidents list"
+              className="lg:hidden w-14 h-14 flex items-center justify-center rounded-[20px] bg-white/5 backdrop-blur-3xl border border-white/10 text-white shadow-2xl transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <Menu className="w-6 h-6" />
             </motion.button>
@@ -212,7 +226,9 @@ export default function Home() {
               animate={{ y: 0, opacity: 1 }}
               exit={{ y: 100, opacity: 0 }}
               onClick={() => setIsSidebarOpen(true)}
-              className="lg:hidden absolute bottom-10 left-8 right-8 z-[1001] h-20 rounded-[30px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex items-center justify-between px-8 cursor-pointer active:scale-95 transition-transform group"
+              role="button"
+              aria-label="View active incidents summary"
+              className="lg:hidden absolute bottom-10 left-8 right-8 z-[1001] h-20 rounded-[30px] bg-white/[0.03] backdrop-blur-3xl border border-white/10 shadow-[0_40px_80px_-20px_rgba(0,0,0,0.8)] flex items-center justify-between px-8 cursor-pointer active:scale-95 transition-transform group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
             >
               <div className="flex items-center gap-5">
                 <div className="relative flex h-4 w-4">
@@ -220,8 +236,8 @@ export default function Home() {
                   <span className="relative inline-flex rounded-full h-4 w-4 bg-red-600 shadow-[0_0_20px_rgba(220,38,38,0.8)] border border-white/20"></span>
                 </div>
                 <div className="flex flex-col">
-                  <span className="text-[12px] font-black italic tracking-widest text-white uppercase leading-none">Live Accident Cases</span>
-                  <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.2em] mt-1.5">Processing {alerts.length} Nodes</span>
+                  <span className="text-[12px] font-black italic tracking-widest text-white uppercase leading-none">Active Incidents</span>
+                  <span className="text-[10px] font-bold text-white/60 uppercase tracking-[0.2em] mt-1.5">Monitoring {alerts.length} Incidents</span>
                 </div>
               </div>
               <div className="h-10 w-10 rounded-2xl bg-white/5 border border-white/10 flex items-center justify-center group-hover:bg-white/10 transition-colors">

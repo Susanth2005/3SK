@@ -2,11 +2,13 @@
 
 import { useState, useEffect } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import RespondButton from './RespondButton';
 import { ref, update } from 'firebase/database';
 import { database } from '@/lib/firebase';
-import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert, Flame, Car, Stethoscope, Info, CheckCircle2, Search, Filter } from 'lucide-react';
+import { X, Bell, LogOut, Radio, Clock, MapPin, Activity, Cpu, BellRing, Target, ShieldAlert, Flame, Car, Stethoscope, Info, CheckCircle2, Search, Filter, FileDown } from 'lucide-react';
 import { motion, AnimatePresence } from 'framer-motion';
+import { exportToCSV } from '@/lib/exportUtils';
 
 const TYPE_CONFIG: Record<string, { color: string, icon: any, label: string, glow: string }> = {
   'Fire': { 
@@ -60,6 +62,8 @@ interface AlertData {
   responders?: Record<string, boolean>;
   deviceId?: string;
   locationName?: string;
+  occupancy?: string;
+  contactInfo?: string;
   status?: 'pending' | 'in_progress' | 'resolved';
 }
 
@@ -94,14 +98,23 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
   
   const handleResolve = async (alertId: string, e: React.MouseEvent) => {
     e.stopPropagation();
-    if (!confirm("Are you sure you want to mark this incident as RESOLVED?")) return;
     
-    const alertRef = ref(database, `alerts/${alertId}`);
-    try {
-      await update(alertRef, { status: 'resolved' });
-    } catch (error) {
-      console.error("Failed to resolve alert:", error);
-    }
+    toast("Mark incident as resolved?", {
+      description: "This will move the incident to history.",
+      action: {
+        label: "Confirm",
+        onClick: async () => {
+          const alertRef = ref(database, `alerts/${alertId}`);
+          try {
+            await update(alertRef, { status: 'resolved' });
+            toast.success("Incident resolved successfully");
+          } catch (error) {
+            console.error("Failed to resolve alert:", error);
+            toast.error("Failed to resolve incident");
+          }
+        },
+      },
+    });
   };
 
   return (
@@ -141,13 +154,27 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                   <Target className="w-6 h-6 text-red-500" />
                </div>
                <div className="flex flex-col">
-                 <h2 className="text-xl font-black italic tracking-tighter text-white uppercase leading-none">
-                    Live Alert Cases
-                 </h2>
-                 <span className="text-[9px] font-black text-white/40 tracking-[0.4em] uppercase mt-2">Active Surveillance</span>
+                  <h2 className="text-xl font-black italic tracking-tighter text-white uppercase leading-none">
+                     Active Incidents
+                  </h2>
+                  <div className="flex items-center gap-3 mt-2">
+                    <span className="text-[9px] font-black text-white/70 tracking-[0.4em] uppercase">Live Monitoring</span>
+                    <button 
+                      onClick={() => exportToCSV(alerts)}
+                      className="p-1.5 bg-white/5 hover:bg-white/10 rounded-lg border border-white/5 transition-all group/dl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+                      title="Export Incident Logs"
+                      aria-label="Export incident logs as CSV"
+                    >
+                      <FileDown className="w-3.5 h-3.5 text-white/40 group-hover/dl:text-emerald-400 transition-colors" />
+                    </button>
+                  </div>
                </div>
             </div>
-            <button onClick={onClose} className="lg:hidden p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all">
+            <button 
+              onClick={onClose} 
+              aria-label="Close sidebar"
+              className="lg:hidden p-3 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50"
+            >
               <X className="w-5 h-5 text-white/60" />
             </button>
           </div>
@@ -155,13 +182,13 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
           <div className="mt-8 space-y-4 relative z-10">
             {/* Search Bar */}
             <div className="relative group">
-              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/30 group-focus-within:text-red-500 transition-colors" />
+              <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-4 h-4 text-white/60 group-focus-within:text-red-500 transition-colors" />
               <input 
                 type="text" 
                 placeholder="Search by location..." 
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-xs text-white placeholder:text-white/20 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all"
+                className="w-full bg-white/5 border border-white/10 rounded-2xl py-4 pl-12 pr-6 text-xs text-white placeholder:text-white/40 focus:outline-none focus:border-red-500/50 focus:bg-white/10 transition-all focus-visible:ring-2 focus-visible:ring-red-500"
               />
             </div>
 
@@ -175,9 +202,11 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                     shrink-0 px-5 py-2.5 rounded-xl text-[10px] font-black uppercase tracking-widest border transition-all
                     ${activeCategory === cat 
                       ? 'bg-red-600 border-red-500 text-white shadow-[0_5px_15px_-3px_rgba(220,38,38,0.4)]' 
-                      : 'bg-white/5 border-white/10 text-white/40 hover:bg-white/10 hover:text-white'
+                      : 'bg-white/5 border-white/10 text-white/70 hover:bg-white/10 hover:text-white'
                     }
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500
                   `}
+                  aria-label={`Filter by ${cat}`}
                 >
                   {cat}
                 </button>
@@ -207,8 +236,8 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                     <div className="p-8 bg-white/5 rounded-[40px] border border-white/10 shadow-inner">
                       <Radio className="w-10 h-10 text-white/20 animate-pulse" />
                     </div>
-                    <p className="text-[10px] font-black text-white/30 uppercase tracking-[0.5em] italic">
-                      {searchQuery || activeCategory !== 'All' ? 'No matches found' : 'Scanning Frequencies...'}
+                    <p className="text-[10px] font-black text-white/60 uppercase tracking-[0.5em] italic">
+                      {searchQuery || activeCategory !== 'All' ? 'No matches found' : 'Searching for incidents...'}
                     </p>
                   </motion.div>
                 );
@@ -222,7 +251,9 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                   transition={{ type: "spring", damping: 20, stiffness: 100, delay: idx * 0.1 }}
                   key={alert.id} 
                   onClick={() => onFocusLocation?.({ lat: alert.lat, lng: alert.lng })}
-                  className="relative rounded-[28px] bg-zinc-900 border border-white/15 p-6 transition-all duration-300 hover:bg-zinc-800 hover:border-white/30 hover:-translate-y-1 shadow-xl group cursor-pointer active:scale-[0.97] overflow-hidden"
+                  role="button"
+                  aria-label={`View details for incident: ${alert.locationName || 'Unspecified location'}`}
+                  className="relative rounded-[28px] bg-zinc-900 border border-white/15 p-6 transition-all duration-300 hover:bg-zinc-800 hover:border-white/30 hover:-translate-y-1 shadow-xl group cursor-pointer active:scale-[0.97] overflow-hidden focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
                 >
                   {(() => {
                     const config = TYPE_CONFIG[alert.type as keyof typeof TYPE_CONFIG] || TYPE_CONFIG.default;
@@ -271,12 +302,35 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                   <p className="text-white/80 group-hover:text-white text-[14px] leading-relaxed mb-6 font-medium transition-colors">
                     {alert.message}
                   </p>
+
+                  {(alert.occupancy || alert.contactInfo) && (
+                    <div className="grid grid-cols-2 gap-2 mb-6 p-3 bg-white/5 rounded-2xl border border-white/5">
+                      {alert.occupancy && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] uppercase font-black text-amber-500/70 tracking-widest">Occupants</span>
+                          <div className="flex items-center gap-1.5 font-bold text-white text-xs">
+                            <Activity className="w-3 h-3" />
+                            {alert.occupancy} People
+                          </div>
+                        </div>
+                      )}
+                      {alert.contactInfo && (
+                        <div className="flex flex-col gap-1">
+                          <span className="text-[9px] uppercase font-black text-blue-500/70 tracking-widest">Emergency</span>
+                          <div className="flex items-center gap-1.5 font-bold text-white text-xs">
+                            <Target className="w-3 h-3" />
+                            {alert.contactInfo}
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                  )}
                   
                   <div className="flex justify-between items-center pt-5 border-t border-white/10">
                     <div className="flex flex-col">
                       <div className="flex items-center gap-2 opacity-50 group-hover:opacity-80 transition-opacity">
                         <Cpu className="w-4 h-4" />
-                        <span className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mb-1">Link Identity</span>
+                        <span className="text-[9px] font-black uppercase tracking-[0.2em] leading-none mb-1">Device ID</span>
                       </div>
                       <span className="text-[12px] font-black uppercase text-white tracking-widest leading-none mt-1 italic">
                         {alert.deviceId || 'TITAN-SYS-01'}
@@ -292,10 +346,11 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                       whileHover={{ scale: 1.02 }}
                       whileTap={{ scale: 0.98 }}
                       onClick={(e) => handleResolve(alert.id, e)}
-                      className="mt-4 w-full py-3 rounded-2xl bg-emerald-600/15 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all group/res"
+                      aria-label="Mark as Resolved"
+                      className="mt-4 w-full py-3 rounded-2xl bg-emerald-600/15 hover:bg-emerald-600/30 border border-emerald-500/30 text-emerald-400 text-[10px] font-black uppercase tracking-[0.2em] flex items-center justify-center gap-3 transition-all group/res focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500"
                     >
                       <CheckCircle2 className="w-4 h-4 group-hover/res:scale-110 transition-transform" />
-                      Mark Protocol Resolved
+                      Mark as Resolved
                     </motion.button>
                   )}
                 </motion.div>
@@ -311,11 +366,12 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
           {permission !== 'granted' && (
             <button 
               onClick={requestNotificationPermission}
-              className="relative overflow-hidden w-full bg-gradient-to-r from-zinc-100 to-white text-black font-black px-8 py-4 rounded-[24px] shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all text-xs tracking-[0.2em] uppercase"
+              aria-label="Enable desktop notifications"
+              className="relative overflow-hidden w-full bg-gradient-to-r from-zinc-100 to-white text-black font-black px-8 py-4 rounded-[24px] shadow-[0_20px_40px_-10px_rgba(255,255,255,0.2)] hover:scale-105 active:scale-95 transition-all text-xs tracking-[0.2em] uppercase focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
             >
               <div className="flex items-center justify-center gap-4 relative z-10">
                 <BellRing className="w-4 h-4 fill-black animate-bounce" />
-                <span>Enable Satellite Link</span>
+                <span>Enable Notifications</span>
               </div>
             </button>
           )}
@@ -328,7 +384,7 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
                 </div>
               </div>
               <div className="flex flex-col">
-                <span className="text-[10px] font-black text-white/40 uppercase tracking-[0.3em] leading-none mb-2">Comms Officer</span>
+                <span className="text-[10px] font-black text-white/70 uppercase tracking-[0.3em] leading-none mb-2">Operator</span>
                 <span className="text-sm font-black text-white tracking-tighter italic group-hover:text-white/80 transition-colors">
                    {user?.email?.split('@')[0]}
                 </span>
@@ -337,10 +393,11 @@ export default function Sidebar({ alerts = [], onFocusLocation, isOpen, onClose 
             
             <button 
               onClick={logout}
-              className="p-4 bg-white/5 hover:bg-red-600/10 border border-white/10 hover:border-red-600/30 rounded-[20px] transition-all group active:scale-90"
-              title="Terminate Protocol"
+              className="p-4 bg-white/5 hover:bg-red-600/10 border border-white/10 hover:border-red-600/30 rounded-[20px] transition-all group active:scale-90 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+              title="Logout"
+              aria-label="Logout"
             >
-              <LogOut className="w-5 h-5 text-white/50 group-hover:text-red-400 transition-colors" />
+              <LogOut className="w-5 h-5 text-white/70 group-hover:text-red-400 transition-colors" />
             </button>
           </div>
         </div>

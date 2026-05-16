@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect, useRef } from 'react';
+import { toast } from 'sonner';
 import { useAuth } from '@/contexts/AuthContext';
 import { ref, push, set } from 'firebase/database';
 import { database } from '@/lib/firebase';
@@ -102,12 +103,13 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
         status: 'pending'
       });
       
+      toast.success('Incident report submitted successfully');
       onClose();
       setFormData({ type: 'General', contact: '', message: '', lat: '10.8505', lng: '76.2711' });
       setSearchQuery('');
     } catch (error) {
       console.error(error);
-      alert('Failed to transmit report');
+      toast.error('Failed to transmit report');
     } finally {
       setLoading(false);
     }
@@ -138,13 +140,17 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
                   <AlertTriangle className="w-7 h-7 text-red-500 animate-pulse" />
                </div>
                <div className="flex flex-col">
-                 <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-none">
-                    Broadcast Node
-                 </h2>
-                 <span className="text-[10px] font-black text-white/30 tracking-[0.4em] uppercase mt-2">Emergency Transmission Protocol</span>
+                  <h2 className="text-2xl font-black italic tracking-tighter text-white uppercase leading-none">
+                     New Incident Report
+                  </h2>
+                  <span className="text-[10px] font-black text-white/60 tracking-[0.4em] uppercase mt-2">Submit Details</span>
                </div>
             </div>
-            <button onClick={onClose} className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all group">
+            <button 
+              onClick={onClose} 
+              aria-label="Close modal"
+              className="p-4 bg-white/5 hover:bg-white/10 rounded-2xl border border-white/5 transition-all group focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500"
+            >
               <X className="w-6 h-6 text-white/40 group-hover:text-white" />
             </button>
           </div>
@@ -162,9 +168,11 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
                     px-4 py-6 rounded-2xl border transition-all text-[10px] font-black uppercase tracking-widest
                     ${formData.type === t 
                       ? 'bg-red-600 border-red-500 text-white shadow-[0_10px_20px_-5px_rgba(220,38,38,0.4)]' 
-                      : 'bg-white/5 border-white/5 text-white/30 hover:bg-white/10 hover:text-white'
+                      : 'bg-white/5 border-white/5 text-white/60 hover:bg-white/10 hover:text-white'
                     }
+                    focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500
                   `}
+                  aria-label={`Select ${t} type`}
                 >
                   {t}
                 </button>
@@ -174,19 +182,19 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
             {/* LOCATION CONFIG */}
             <div className="space-y-6">
               <div className="relative" ref={searchRef}>
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-3 block">Geospatial Target</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-3 block">Incident Location</label>
                 <div className="relative group">
                   <Search className="absolute left-5 top-1/2 -translate-y-1/2 w-5 h-5 text-white/20 group-focus-within:text-red-500 transition-colors" />
                   <input 
                     type="text"
-                    placeholder="SCANNING FOR COORDINATES..."
+                    placeholder="Search for location..."
                     value={searchQuery}
                     onChange={(e) => {
                       setSearchQuery(e.target.value);
                       setShowSuggestions(true);
                     }}
                     onFocus={() => { if (suggestions.length > 0) setShowSuggestions(true); }}
-                    className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/10 focus:bg-white/10 focus:border-white/20 outline-none transition-all italic text-sm"
+                    className="w-full pl-14 pr-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/40 focus:bg-white/10 focus:border-red-500/50 outline-none transition-all italic text-sm focus-visible:ring-2 focus-visible:ring-red-500"
                   />
                   {isSearching && (
                     <div className="absolute right-6 top-1/2 -translate-y-1/2">
@@ -217,11 +225,11 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
 
               <div className="grid grid-cols-2 gap-6">
                 <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl group">
-                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-2 block">Latitude</label>
+                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60 mb-2 block">Latitude</label>
                   <div className="text-sm font-black text-white italic tracking-widest">{formData.lat}</div>
                 </div>
                 <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl group">
-                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/20 mb-2 block">Longitude</label>
+                  <label className="text-[9px] font-black uppercase tracking-[0.2em] text-white/60 mb-2 block">Longitude</label>
                   <div className="text-sm font-black text-white italic tracking-widest">{formData.lng}</div>
                 </div>
               </div>
@@ -230,24 +238,24 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
             {/* COMMS DATA */}
             <div className="space-y-6">
               <div>
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-3 block">Tactical Comms</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-3 block">Emergency Contact</label>
                 <input 
                   type="tel" required
-                  placeholder="AUTHORITY CONTACT CODE"
+                  placeholder="Enter contact number"
                   value={formData.contact}
                   onChange={(e) => setFormData({...formData, contact: e.target.value})}
-                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/10 focus:bg-white/10 focus:border-white/20 outline-none transition-all italic text-sm"
+                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/40 focus:bg-white/10 focus:border-red-500/50 outline-none transition-all italic text-sm focus-visible:ring-2 focus-visible:ring-red-500"
                 />
               </div>
 
               <div>
-                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/20 mb-3 block">Incident Briefing</label>
+                <label className="text-[10px] font-black uppercase tracking-[0.3em] text-white/60 mb-3 block">Incident Description</label>
                 <textarea 
                   required
-                  placeholder="DESCRIBE SITUATION PARAMETERS..."
+                  placeholder="Provide incident details..."
                   value={formData.message}
                   onChange={(e) => setFormData({...formData, message: e.target.value})}
-                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/10 focus:bg-white/10 focus:border-white/20 outline-none transition-all italic text-sm min-h-[140px] resize-none"
+                  className="w-full px-6 py-5 bg-white/5 border border-white/10 rounded-2xl text-white font-bold placeholder:text-white/40 focus:bg-white/10 focus:border-red-500/50 outline-none transition-all italic text-sm min-h-[140px] resize-none focus-visible:ring-2 focus-visible:ring-red-500"
                 />
               </div>
             </div>
@@ -257,7 +265,8 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
               whileTap={{ scale: 0.98 }}
               type="submit" 
               disabled={loading}
-              className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white font-black py-6 rounded-[24px] shadow-[0_20px_40px_-10px_rgba(220,38,38,0.5)] transition-all text-xs tracking-[0.4em] uppercase group overflow-hidden relative"
+              aria-label="Submit incident report"
+              className="w-full bg-gradient-to-r from-red-600 to-red-500 text-white font-black py-6 rounded-[24px] shadow-[0_20px_40px_-10px_rgba(220,38,38,0.5)] transition-all text-xs tracking-[0.4em] uppercase group overflow-hidden relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-red-500 focus-visible:ring-offset-2 focus-visible:ring-offset-black"
             >
               <div className="flex items-center justify-center gap-4 relative z-10">
                 {loading ? (
@@ -265,7 +274,7 @@ export default function ReportModal({ isOpen, onClose }: ReportModalProps) {
                 ) : (
                   <>
                     <Zap className="w-5 h-5 fill-white" />
-                    <span>BROADCAST SIGNAL</span>
+                    <span>SUBMIT REPORT</span>
                   </>
                 )}
               </div>

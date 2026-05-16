@@ -1,6 +1,7 @@
 'use client';
 
 import { useAuth } from '@/contexts/AuthContext';
+import { toast } from 'sonner';
 import { ref, runTransaction } from 'firebase/database';
 import { database } from '@/lib/firebase';
 import { motion } from 'framer-motion';
@@ -20,7 +21,7 @@ export default function RespondButton({ alertId, responders = {} }: RespondButto
   const handleRespond = async (e: React.MouseEvent) => {
     e.stopPropagation(); 
     if (!user) {
-      alert("You must be authenticated to join the tactical response.");
+      toast.error("You must be authenticated to join the response team.");
       return;
     }
     
@@ -42,8 +43,14 @@ export default function RespondButton({ alertId, responders = {} }: RespondButto
         }
         return alert;
       });
+      if (hasResponded) {
+        toast.info("You have withdrawn from the response team.");
+      } else {
+        toast.success("You are now a responder for this incident!");
+      }
     } catch (error) {
       console.error("Failed to update responder status:", error);
+      toast.error("Failed to update response status.");
     }
   };
 
@@ -52,6 +59,7 @@ export default function RespondButton({ alertId, responders = {} }: RespondButto
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
       onClick={handleRespond}
+      aria-label={hasResponded ? "Currently responding" : "Join response team"}
       className={`
         relative px-5 py-2.5 rounded-xl text-[10px] font-black tracking-widest transition-all 
         border flex items-center gap-2.5
@@ -59,10 +67,11 @@ export default function RespondButton({ alertId, responders = {} }: RespondButto
           ? 'bg-emerald-600/20 text-emerald-500 border-emerald-500/40 shadow-[0_0_20px_rgba(16,185,129,0.2)]' 
           : 'bg-white/5 text-white/50 border-white/10 hover:bg-white/10 hover:text-white'
         }
+        focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-emerald-500
       `}
     >
       <div className={`w-1.5 h-1.5 rounded-full ${hasResponded ? 'bg-emerald-500 animate-pulse' : 'bg-white/20'}`} />
-      <span>{hasResponded ? 'PROTOCOL ACTIVE' : 'INITIATE RESPONSE'}</span>
+      <span>{hasResponded ? 'RESPONDING' : 'RESPOND'}</span>
       {count > 0 && (
         <span className={`ml-1.5 px-2 py-0.5 rounded-lg text-[9px] font-black italic ${
           hasResponded ? 'bg-emerald-500/30 text-white' : 'bg-white/10 text-white/40'

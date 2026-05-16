@@ -14,9 +14,11 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Accident Response Dashboard",
+  title: "Active Incident Dashboard",
   description: "Real-time incident tracking system built with Next.js and Firebase",
 };
+
+import { Toaster } from "sonner";
 
 export default function RootLayout({
   children,
@@ -29,7 +31,10 @@ export default function RootLayout({
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
       <body className="min-h-full flex flex-col font-sans text-black dark:text-white bg-zinc-50 dark:bg-zinc-950">
-        <AuthProvider>{children}</AuthProvider>
+        <AuthProvider>
+          {children}
+          <Toaster position="top-right" theme="dark" richColors closeButton />
+        </AuthProvider>
       </body>
     </html>
   );

@@ -1,6 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
+import { toast } from 'sonner';
 import { MapContainer, TileLayer, Marker, Popup, useMap, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
 import L from 'leaflet';
@@ -98,6 +99,7 @@ function TileLayerSwitcher({ layerKey }: { layerKey: string }) {
   const layer = MAP_LAYERS.find(l => l.key === layerKey) || MAP_LAYERS[0];
   return (
     <TileLayer
+      key={layerKey}
       attribution={layer.attribution}
       url={layer.url}
       maxZoom={layer.maxZoom}
@@ -116,7 +118,7 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
 
   const fetchRoute = async (destLat: number, destLng: number) => {
     if (!navigator.geolocation) {
-      alert("Geolocation is not supported by your browser.");
+      toast.error("Geolocation is not supported by your browser.");
       return;
     }
 
@@ -133,17 +135,17 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
           const coords = data.routes[0].geometry.coordinates.map((coord: [number, number]) => [coord[1], coord[0]]);
           setRoutePolyline(coords);
         } else {
-          alert("No valid driving route found from your current location.");
+          toast.error("No valid driving route found from your current location.");
         }
       } catch (e) {
         console.error(e);
-        alert("Failed to calculate route.");
+        toast.error("Failed to calculate route.");
       } finally {
         setRoutingLoading(false);
       }
     }, (error) => {
       console.error(error);
-      alert("Could not get your location. Please ensure GPS/Location permissions are granted in your browser.");
+      toast.error("Could not get your location. Please ensure GPS permissions are granted.");
       setRoutingLoading(false);
     });
   };
@@ -159,10 +161,11 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
             <button
               key={layer.key}
               onClick={() => { setActiveLayer(layer.key); setShowLayerMenu(false); }}
-              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${
+              aria-label={`Switch to ${layer.label} view`}
+              className={`flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 ${
                 activeLayer === layer.key 
                   ? 'bg-white/20 text-white shadow-inner' 
-                  : 'text-white/40 hover:bg-white/5 hover:text-white'
+                  : 'text-white/70 hover:bg-white/10 hover:text-white'
               }`}
             >
               <span className="text-sm">{layer.icon}</span>
@@ -226,10 +229,11 @@ export default function MapWidget({ alerts, focusLocation }: MapWidgetProps) {
                   <button 
                     onClick={() => fetchRoute(alert.lat, alert.lng)}
                     disabled={routingLoading}
-                    className="flex-1 mt-3 flex items-center justify-center bg-zinc-100 border border-zinc-300 text-zinc-800 px-2 py-1.5 rounded-md text-[11px] font-bold tracking-wide hover:bg-zinc-200 transition-colors disabled:opacity-50"
+                    aria-label="Get driving directions"
+                    className="flex-1 mt-3 flex items-center justify-center bg-zinc-100 border border-zinc-300 text-zinc-800 px-2 py-1.5 rounded-md text-[11px] font-bold tracking-wide hover:bg-zinc-200 transition-colors disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500"
                     title="Get Driving Directions"
                   >
-                    {routingLoading ? '📍...' : '📍 ROUTE'}
+                    {routingLoading ? '...' : 'GET DIRECTIONS'}
                   </button>
                 </div>
               </div>
